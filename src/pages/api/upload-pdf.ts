@@ -60,18 +60,39 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               )
 
               await Promise.all(
-                pageBase64Strings.map(async (pageBase64String, index) => {
+                pageBase64Strings.map(async (pageBase64String) => {
                   const pageBuffer = Buffer.from(pageBase64String, 'base64')
-                  const pageFileName = `${index + 1}_${uuidv4()}.pdf`
-                  const pageFolderPath = path.join(
-                    process.cwd(),
-                    'public',
-                    'uploads'
-                  )
-                  await fsExtra.writeFile(
-                    path.join(pageFolderPath, pageFileName),
-                    pageBuffer
-                  )
+                  const extractedData = await extractPdfData(pageBuffer)
+                  
+                  if (extractedData) {
+                    extractedData.map(async (data) => {
+                      const pageFileName = extractedData.map((data) => `${data.cpf}_${data.name}_${data.enrollment}_${data.month}_${data.year}.pdf`).toString()
+                      if (data.cpf && data.name && data.enrollment && data.month && data.year) {
+                        const pageFolderPath = path.join(
+                          process.cwd(),
+                          'public',
+                          'uploads',
+                          'success'
+                        )
+                        await fsExtra.writeFile(
+                          path.join(pageFolderPath, pageFileName),
+                          pageBuffer
+                        )
+                      } else {
+                        const pageFolderPath = path.join(
+                          process.cwd(),
+                          'public',
+                          'uploads',
+                          'error'
+                        )
+                        await fsExtra.writeFile(
+                          path.join(pageFolderPath, pageFileName),
+                          pageBuffer
+                        )
+                      }
+                    }
+                    )
+                  }
                 })
               )
 
@@ -81,47 +102,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             // split PDF upload by page and save to public/uploads folder
             const pageBuffers = await splitPdfIntoPages(pdfBuffer)
 
-            // Search for PDF files in public/uploads folder, extract data, and rename file to include data extracted
-            const uploadFolderPath = path.join(
-              process.cwd(),
-              'public',
-              'uploads'
-            )
-            const files = await fsExtra.readdir(uploadFolderPath)
-            await Promise.all(
-              files.map(async (fileName) => {
-                try {
-                  if (fileName.endsWith('.pdf')) {
-                    const filePath = path.join(uploadFolderPath, fileName)
-
-                    // Extract data from page using extractPdfData()
-                    const extractedData = await extractPdfData(filePath)
-                    console.log(extractedData)
-
-                    // Rename file to include extracted data
-                    const newFileName = `
-                    ${extractedData.cpf}_
-                    ${extractedData.name}_
-                    ${extractedData.enrollment}_
-                    ${extractedData.month}_
-                    ${extractedData.year}_
-                    .pdf`
-                    // Create new file path
-                    const newFilePath = path.join(uploadFolderPath, newFileName)
-                    // Rename file in public/uploads folder
-                    await fsExtra.rename(filePath, newFilePath)
-                    // Delete file from public/uploads folder
-                    await fsExtra.remove(filePath)
-                  }
-
-                } catch (error) {
-                  console.error(error)
-                }
-              })
-            )
-            
-
-            return { fileName: file.originalname, pageBuffers }
+            return { pageBuffers }
           } catch (error) {
             console.error(error)
             return { fileName: file.originalname, error: error.message }
