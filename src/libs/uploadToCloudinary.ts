@@ -1,4 +1,5 @@
-import { UploadApiResponse, v2 as cloudinary } from 'cloudinary'
+import { v2 as cloudinary } from 'cloudinary'
+import { PassThrough } from 'stream'
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -6,22 +7,48 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 })
 
+const uploadToCloudinary = (
+  buffer: Buffer,
+  fileName: string,
+  folder: string
+): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const passThrough = new PassThrough()
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: folder,
+        public_id: fileName,
+      },
+      (error, result) => {
+        if (error) {
+          reject(error)
+        } else {
+          resolve()
+        }
+      }
+    )
 
-const uploadToCloudinary = async (pdfBuffer: Buffer, fileName: string, folderName: string) => {
-  try {
-    const base64String = pdfBuffer.toString('base64')
-    const result: UploadApiResponse = await cloudinary.uploader.upload(`data:application/pdf;base64,${base64String}`, {
-      folder: folderName,
-      public_id: fileName,
-      resource_type: 'auto'
+    let uploadedBytes = 0
+    let totalBytes = buffer.byteLength
+
+    passThrough.on('data', (chunk: Buffer) => {
+      uploadedBytes += chunk.length
+      const progress = (uploadedBytes / totalBytes) * 100
+      console.log(`Uploading ${fileName} - ${progress.toFixed(2)}% completed`)
     })
 
-    return result.secure_url
-  } catch (error) {
-    console.error(`Error uploading file to Cloudinary: ${error}`);
-    console.error(error);
-    throw new Error('Error uploading file to Cloudinary');
-  }
+    passThrough.on('error', (error: Error) => {
+      reject(error)
+    })
+
+    passThrough.on('end', () => {
+      console.log(`Uploading ${fileName} - 100% completed`)
+    })
+
+    passThrough.pipe(uploadStream)
+    passThrough.write(buffer)
+    passThrough.end()
+  })
 }
 
 export default uploadToCloudinary
