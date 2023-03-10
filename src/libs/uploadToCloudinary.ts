@@ -1,4 +1,4 @@
-import { UploadApiErrorResponse, UploadApiResponse, v2 as cloudinary } from 'cloudinary'
+import { UploadApiResponse, v2 as cloudinary } from 'cloudinary'
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -18,8 +18,9 @@ const uploadToCloudinary = async (pdfBuffer: Buffer, fileName: string, folderNam
 
     return result.secure_url
   } catch (error) {
-    console.error(`Error uploading file to Cloudinary: ${(error as UploadApiErrorResponse).message}`)
-    throw new Error('Error uploading file to Cloudinary')
+    console.error(`Error uploading file to Cloudinary: ${error}`);
+    console.error(error);
+    throw new Error('Error uploading file to Cloudinary');
   }
 }
 
