@@ -4,12 +4,12 @@ const extractCpf = (item: string): string | null => {
   const regex = /CPF[\n\s]*(\d{3}\.\d{3}\.\d{3}\-\d{2})/;
   const match = item.match(regex)?.[1];
   if(match) {
-    return match;
+    return match.replace(/[.-]/g, "");
   } else {
     const regex = /\d{3}\.\d{3}\.\d{3}\-\d{2}/;
     const match = item.match(regex);
     const cpf = match ? match[0] : null;
-    return cpf;
+    return cpf?.replace(/[.-]/g, "") ?? null;
   }
 };
 
@@ -20,18 +20,18 @@ const extractName = (item: string): string | null => {
   if (match) {
     const name = match[0].replace(/^\d{5}/, '').replace(/MatrículaNome/, '').trim();
 
-    return name;
+    return name.replace(/\s+/g, '-');
     
   } else {
     const regex1 = /Nome\s+(.+)\s+\d{3}\.\d{3}\.\d{3}\-\d{2}/;
     const match1 = item.match(regex1);
-    const name1 = match1 ? match1[1] : null;
-    
+    const name1 = match1 ? match1[1] : '';
+
     const regex2 = /Nome\s+(.+)\s+\d{2}\/\d{2}\/\d{4}/;
     const match2 = item.match(regex2);
-    const name2 = match2 ? match2[1] : null;
-    
-    return name1 ?? name2 ?? null;
+    const name2 = match2 ? match2[1] : '';
+
+    return name1.replace(/\s+/g, '-') || name2.replace(/\s+/g, '-') || null;
   }
 };
 
@@ -96,7 +96,7 @@ const extractPdfData = async (
 
   extractedData.push({
     cpf: extractCpf(page),
-    name: extractName(page)?.replace(/\s+/g, '-'),
+    name: extractName(page),
     enrollment: extractEnrollment(page),
     month: extractMonth(page),
     year: extractYear(page),

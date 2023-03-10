@@ -67,7 +67,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                   
                   if (extractedData) {
                     extractedData.map(async (data) => {
-                      const pageFileName = extractedData.map((data) => `${data.cpf}_${data.name}_${data.enrollment}_${data.month}_${data.year}.pdf`).toString()
+                      const pageFileName = extractedData.map((data) => `${data.cpf}-${data.name}-${data.enrollment}-${data.month}-${data.year}.pdf`).toString()
                       if (data.cpf && data.name && data.enrollment && data.month && data.year) {
                         // verify if folder exists
                         if (!fsExtra.existsSync(path.join(process.cwd(), 'public', 'uploads', `${data.year}`))){
@@ -86,8 +86,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                           )
                         
                       } else {
-                        if (!fsExtra.existsSync(path.join(process.cwd(), 'public', 'uploads', `${data.year}_with-errors`))){
-                          mkdir(path.join(process.cwd(), 'public', 'uploads', `${data.year}_with-errors`))
+                        if (!fsExtra.existsSync(path.join(process.cwd(), 'public', 'uploads', `${data.year}-with-errors`))){
+                          mkdir(path.join(process.cwd(), 'public', 'uploads', `${data.year}-with-errors`))
                         }
 
                         const pageFolderPath = path.join(
