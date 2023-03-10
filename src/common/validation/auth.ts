@@ -1,7 +1,23 @@
 import * as z from 'zod'
 
 export const loginSchema = z.object({
-  cpf: z.string().min(11).max(11),
+  cpf: z
+    .string()
+    .min(11)
+    .max(11)
+    .optional()
+    .refine(
+      (value) => {
+        if (value) {
+          return value.length === 11
+        }
+        return true
+      },
+      {
+        message: 'CPF deve ter 11 dígitos',
+        path: ['cpf'],
+      }
+    ),
   password: z.string(),
   // todo: add password validation based on the requirements enrollment field on schema database
   // .min(4).max(12),

@@ -29,7 +29,8 @@
       "@assets/*": ["./src/assets/*"],
       "@common/*": ["src/common/*"],
       "@types": ["./src/types/index.ts"],
-      "@server/*": ["./src/server/*"]
+      "@server/*": ["./src/server/*"],
+      "@libs/*": ["./src/libs/*"]
     }
   },
   "include": [
