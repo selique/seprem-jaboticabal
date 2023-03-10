@@ -44,10 +44,10 @@ const extractEnrollment = (item: string): number | null => {
   } else {
     const regex = /Matrícula\s+(\d{5})/;
     const match = item.match(regex);
-    return match ? match[1] : null;
+    return match ? +match[1] : null;
   }
-
 };
+
 const extractMonth = (item: string): number | null => {
   const months = [
     'janeiro',
@@ -92,14 +92,11 @@ const extractPdfData = async (
   const data = await pdf(pdfBuffer);
 
   const page = data.text
-  console.log(page)
   const extractedData = [];
-  console.log(extractMonth(page) === 12)
-  console.log(extractYear(page) === 2022)
 
   extractedData.push({
     cpf: extractCpf(page),
-    name: extractName(page),
+    name: extractName(page)?.replace(/\s+/g, '-'),
     enrollment: extractEnrollment(page),
     month: extractMonth(page),
     year: extractYear(page),
