@@ -1,5 +1,6 @@
 import extractPdfData from '@/libs/extractPdfData'
-import fsExtra from 'fs-extra'
+import uploadToCloudinary from '@/libs/uploadToCloudinary'
+import fsExtra, { mkdir } from 'fs-extra'
 import multer, { MulterError } from 'multer'
 import { NextApiRequest, NextApiResponse } from 'next'
 import path from 'path'
@@ -68,28 +69,41 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                     extractedData.map(async (data) => {
                       const pageFileName = extractedData.map((data) => `${data.cpf}_${data.name}_${data.enrollment}_${data.month}_${data.year}.pdf`).toString()
                       if (data.cpf && data.name && data.enrollment && data.month && data.year) {
-                        const pageFolderPath = path.join(
-                          process.cwd(),
-                          'public',
-                          'uploads',
-                          'success'
-                        )
-                        await fsExtra.writeFile(
-                          path.join(pageFolderPath, pageFileName),
-                          pageBuffer
-                        )
+                        // verify if folder exists
+                        if (!fsExtra.existsSync(path.join(process.cwd(), 'public', 'uploads', `${data.year}`))){
+                          mkdir(path.join(process.cwd(), 'public', 'uploads', `${data.year}`))
+                      }  
+                          const pageFolderPath = path.join(
+                            process.cwd(),
+                            'public',
+                            'uploads',
+                            `${data.year}`
+                          )
+                          uploadToCloudinary(pageBuffer, pageFileName, pageFolderPath)
+                          await fsExtra.writeFile(
+                            path.join(pageFolderPath, pageFileName),
+                            pageBuffer
+                          )
+                        
                       } else {
+                        if (!fsExtra.existsSync(path.join(process.cwd(), 'public', 'uploads', `${data.year}_with-errors`))){
+                          mkdir(path.join(process.cwd(), 'public', 'uploads', `${data.year}_with-errors`))
+                        }
+
                         const pageFolderPath = path.join(
                           process.cwd(),
                           'public',
                           'uploads',
-                          'error'
+                          `${data.year}_with-errors`
                         )
                         await fsExtra.writeFile(
                           path.join(pageFolderPath, pageFileName),
                           pageBuffer
                         )
                       }
+                      
+                       // Remove uploaded file from server
+                       await fsExtra.remove(file.path)
                     }
                     )
                   }
