@@ -1,87 +1,59 @@
 import pdf from 'pdf-extraction'
 
+const months = [
+  'janeiro',
+  'fevereiro',
+  'março',
+  'abril',
+  'maio',
+  'junho',
+  'julho',
+  'agosto',
+  'setembro',
+  'outubro',
+  'novembro',
+  'dezembro',
+]
+
+const titleCase = (str: string): string =>
+  str
+    .replace(
+      /\w\S*/g,
+      (txt) => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase()
+    )
+    .trim()
+
 const extractCpf = (item: string): string | null => {
-  const regex = /CPF[\n\s]*(\d{3}\.\d{3}\.\d{3}\-\d{2})/
-  const match = item.match(regex)?.[1]
-  if (match) {
-    return match.replace(/[.-]/g, '')
-  } else {
-    const regex = /\d{3}\.\d{3}\.\d{3}\-\d{2}/
-    const match = item.match(regex)
-    const cpf = match ? match[0] : null
-    return cpf?.replace(/[.-]/g, '') ?? null
-  }
+  const extract = item.match(/\d{3}.\d{3}.\d{3}-\d{2}/)
+  return extract ? extract[0] : null
 }
 
 const extractName = (item: string): string | null => {
-  const regex =
-    /\d{5}[A-Za-záàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ0-9'.\s]+MatrículaNome/
-  const match = item.match(regex)
-
-  if (match) {
-    const name = match[0]
-      .replace(/^\d{5}/, '')
-      .replace(/MatrículaNome/, '')
-      .trim()
-
-    return name.replace(/\s+/g, '-')
-  } else {
-    const regex1 = /Nome\s+(.+)\s+\d{3}\.\d{3}\.\d{3}\-\d{2}/
-    const match1 = item.match(regex1)
-    const name1 = match1 ? match1[1] : ''
-
-    const regex2 = /Nome\s+(.+)\s+\d{2}\/\d{2}\/\d{4}/
-    const match2 = item.match(regex2)
-    const name2 = match2 ? match2[1] : ''
-
-    return name1.replace(/\s+/g, '-') || name2.replace(/\s+/g, '-') || null
-  }
+  const extract = item.match(/[^\d]+Matrícula/)
+  return extract ? titleCase(extract[0].replace('Matrícula', '')) : null
 }
 
 const extractEnrollment = (item: string): number | null => {
-  const regex =
-    /(\d{5})[A-Za-záàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ0-9'.\s]+MatrículaNome/
-  const match = item.match(regex)
-
-  if (match) {
-    return +match[1]
-  } else {
-    const regex = /Matrícula\s+(\d{5})/
-    const match = item.match(regex)
-    return match ? +match[1] : null
-  }
+  const extract = item.match(/\d+[^\d]+Matrícula/)
+  return extract ? +extract[0].replace(/[^\d]/g, '') : null
 }
 
 const extractMonth = (item: string): number | null => {
-  const months = [
-    'janeiro',
-    'fevereiro',
-    'março',
-    'abril',
-    'maio',
-    'junho',
-    'julho',
-    'agosto',
-    'setembro',
-    'outubro',
-    'novembro',
-    'dezembro',
-  ]
-
-  const regex = /Mensal([A-Za-z]+) de (\d{4})|(\w+)\s+de\s+(\d{4})Mensal/i
-  const match = item.match(regex)
-  if (!match) return null
-  const monthName = match[1] || match[3]
-  const monthIndex = months.findIndex(
-    (m) => m.toLowerCase() === monthName.toLowerCase()
-  )
-  return monthIndex !== -1 ? monthIndex + 1 : null
+  const extract = item.match(/[^\d]+ de 20\d+/)
+  return extract
+    ? months.indexOf(
+        extract[0]
+          .replace('Mensal', '')
+          .replace(/de \d+/, '')
+          .trim()
+          .toLowerCase()
+      )
+    : null
 }
 
 const extractYear = (item: string): number | null => {
-  const regex = /(?:\bde\s+)(\d{4})/
-  const match = item.match(regex)
-  return match ? +match[1] : null
+  const extract = item.match(/(?:\bde\s+)(\d{4})/)
+  return extract ? +extract[1] : null
 }
 
 const extractPdfData = async (
@@ -97,7 +69,7 @@ const extractPdfData = async (
 > => {
   const data = await pdf(pdfBuffer)
 
-  const page = data.text
+  const page = data.text.replace(/\n/g, '')
   const extractedData = []
 
   extractedData.push({
