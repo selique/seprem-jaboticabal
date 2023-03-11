@@ -1,3 +1,4 @@
+import fs from 'fs'
 import pdf from 'pdf-extraction'
 
 const months = [
@@ -15,14 +16,6 @@ const months = [
   'dezembro',
 ]
 
-const titleCase = (str: string): string =>
-  str
-    .replace(
-      /\w\S*/g,
-      (txt) => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase()
-    )
-    .trim()
-
 const extractCpf = (item: string): string | null => {
   const extract = item.match(/\d{3}.\d{3}.\d{3}-\d{2}/)
   return extract ? extract[0] : null
@@ -30,7 +23,7 @@ const extractCpf = (item: string): string | null => {
 
 const extractName = (item: string): string | null => {
   const extract = item.match(/[^\d]+Matrícula/)
-  return extract ? titleCase(extract[0].replace('Matrícula', '')) : null
+  return extract ? extract[0].replace('Matrícula', '').toUpperCase() : null
 }
 
 const extractEnrollment = (item: string): number | null => {
@@ -39,7 +32,7 @@ const extractEnrollment = (item: string): number | null => {
 }
 
 const extractMonth = (item: string): number | null => {
-  const extract = item.match(/[^\d]+ de 20\d+/)
+  const extract = item.match(/[^\d]+ de \d{4}/)
   return extract
     ? months.indexOf(
         extract[0]
