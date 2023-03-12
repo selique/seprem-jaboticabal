@@ -90,9 +90,7 @@ export default async function handler(req, res) {
       }
 
       // return in json format the array of objects
-      return res.status(200).json({
-        results: arrayResponseJson
-      })
+      return res.status(200).json(arrayResponseJson)
     } catch (error) {
       console.error(`Error processing PDF: ${error}`)
       return res.status(500).send('Error processing PDF')

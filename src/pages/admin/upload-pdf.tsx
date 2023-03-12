@@ -70,26 +70,15 @@ export default function UploadPDF() {
       });
   
       if (res.ok) {
-        const reader = res?.body?.getReader();
-        const decoder = new TextDecoder('utf-8');
-        let results = '';
-        let done = false;
-        
-        while (!done) {
-          const { value, done: readerDone } = await reader?.read();
-          const chunk = decoder.decode(value);
-          results += chunk;
-          done = readerDone;
+        const text = await res.text();
+        console.log(text);
+        const parsedResults = JSON.parse(text);
+        for (const result of parsedResults.results) {
+          processPDFResult(result);
         }
-        const parsedResults = JSON.parse(results);
-        parsedResults.results.forEach(async (result: any) => {
-          console.log(result.cpf);
-          const { data: beneficiaryUser } = await trpc.verifyIfBeneficiaryExists.useQuery(result.cpf);
-          console.log(`Beneficiary ${result.cpf} exists? ${!!beneficiaryUser}`);
-        });
       } else {
         console.error('Error uploading file', res);
-      }
+      } 
     } catch (error) {
       console.error(error);
     } finally {
