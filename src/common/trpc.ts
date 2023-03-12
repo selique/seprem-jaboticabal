@@ -27,5 +27,5 @@ export const trpc = createTRPCNext<IServerRouter>({
       ],
     }
   },
-  ssr: true,
+  ssr: false,
 })

@@ -1,11 +1,11 @@
 import * as z from 'zod'
 
+
 export const loginSchema = z.object({
   cpf: z
     .string()
     .min(11)
     .max(11)
-    .optional()
     .refine(
       (value) => {
         if (value) {
@@ -28,11 +28,18 @@ export const signUpSchema = loginSchema.extend({
   password: z.string(),
 })
 
-export const beneficiarySchema = loginSchema.extend({
+export const beneficiarySchema = z.object({
+  cpf: z.string().min(11).max(11),
   name: z.string(),
-  type_beneficiary: z.string(),
-  enrollment: z.string().min(4).max(12),
+  type_beneficiary: z.string().optional(),
+  enrollment: z.number(),
 })
+
+export const beneficiaryCPFSchema = z.object({
+  cpf: z.string().min(11).max(11),
+})
+
+export type IBeneficiaryCPF = z.infer<typeof beneficiaryCPFSchema>
 
 export type ILogin = z.infer<typeof loginSchema>
 export type ISignUp = z.infer<typeof signUpSchema>
