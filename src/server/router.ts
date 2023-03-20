@@ -106,7 +106,7 @@ export const serverRouter = t.router({
           password: hashedPassword,
           name,
           type_beneficiary: 'BENEFICIARY',
-          enrollment,
+          enrollment
         },
       })
 
