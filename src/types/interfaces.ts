@@ -10,7 +10,7 @@ export interface PdfUploadInput {
 export interface UploadResult {
     cpf: string;
     name: string;
-    enrollment: string;
+    enrollment: number;
     year: number;
     month: number;
     pdf: {
