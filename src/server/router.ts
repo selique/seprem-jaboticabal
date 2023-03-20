@@ -95,13 +95,14 @@ export const serverRouter = t.router({
 
     const exists = await ctx.prisma.beneficiaryUser.findFirst({
       where: { cpf },
-    })
+      })
 
-    if (!exists) {
-      const hashedPassword = await hash(enrollment.toString())
+      if (!exists) {
+        const enrollmentStr = enrollment.toString()
+        const hashedPassword = await hash(enrollmentStr)
 
-      const result = await ctx.prisma.beneficiaryUser.create({
-        data: {
+        const result = await ctx.prisma.beneficiaryUser.create({
+          data: {
           cpf,
           password: hashedPassword,
           name,
