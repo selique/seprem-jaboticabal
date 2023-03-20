@@ -13,7 +13,7 @@ const storage = multer.memoryStorage()
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 1024 * 1024 * 10, // limit file size to 10MB
+    fileSize: 1024 * 1024 * 50, // limit file size to 50MB
   },
   fileFilter: (req, file, cb) => {
     if (file.mimetype !== 'application/pdf') {
@@ -69,16 +69,16 @@ export default async function handler(req, res) {
               console.error('CPF is null or undefined')
               return res.status(400).send('Invalid input')
             }
-      
+            const nameWithoutDash = name.replace(/-/g, ' ')
             const pdfObject = {
+              name: nameWithoutDash,
               cpf,
-              name,
               enrollment,
               year,
               month,
               pdf: {
                 fileName: pageFileName,
-                file: Buffer.from(pageBuffer).toString('base64'),
+                file: Buffer.from(pageBuffer).toString('base64')
               },
             };
             arrayResponseJson.push(pdfObject);
