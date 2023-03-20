@@ -24,7 +24,7 @@ const upload = multer({
   },
 })
 
-export default async function handler(req, res) {
+export default async function handler(req: any, res: any) {
   upload.single('pdf')(req, res, async (err) => {
     if (err) {
       console.error(`Error uploading file: ${err}`)
