@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "BeneficiaryPdfFile" ALTER COLUMN "file" SET NOT NULL,
+ALTER COLUMN "file" SET DATA TYPE TEXT;

@@ -1,14 +1,15 @@
 import { initTRPC, TRPCError } from '@trpc/server'
 import { hash } from 'argon2'
 
-import { beneficiaryCPFSchema, beneficiarySchema } from '@common/validation/auth'
+import {
+  beneficiaryCPFSchema
+} from '@common/validation/auth'
 import { beneficiaryPdfFileSchema } from '@common/validation/pdf'
 import { IContext } from '@server/context'
 
 type PdfFileType = 'HOLERITE' | 'DESMOTRATIVO_ANUAL'
 
 const t = initTRPC.context<IContext>().create()
-
 
 export const serverRouter = t.router({
   // TODO: change to suport only admin users
@@ -41,44 +42,45 @@ export const serverRouter = t.router({
   //     result: result.cpf,
   //   }
   // }),
-  createBeneficiary: t.procedure
-    .input(beneficiarySchema)
-    .mutation(async ({ input, ctx }) => {
-      const { cpf, name, type_beneficiary, enrollment } = input
+  // createBeneficiary: t.procedure
+  //   .input(beneficiarySchema)
+  //   .mutation(async ({ input, ctx }) => {
+  //     const { cpf, name, type_beneficiary, enrollment } = input
 
-      const exists = await ctx.prisma.beneficiaryUser.findFirst({
-        where: { cpf },
-      })
+  //     const exists = await ctx.prisma.beneficiaryUser.findFirst({
+  //       where: { cpf },
+  //     })
 
-      if (exists) {
-        throw new TRPCError({
-          code: 'CONFLICT',
-          message: 'User already exists.',
-        })
-      }
+  //     if (exists) {
+  //       throw new TRPCError({
+  //         code: 'CONFLICT',
+  //         message: 'User already exists.',
+  //       })
+  //     }
 
-      const hashedPassword = await hash(enrollment.toString())
+  //     const hashedPassword = await hash(enrollment.toString())
 
-      const result = await ctx.prisma.beneficiaryUser.create({
-        data: {
-          cpf,
-          password: hashedPassword,
-          name,
-          type_beneficiary,
-          enrollment,
-        },
-      })
+  //     const result = await ctx.prisma.beneficiaryUser.create({
+  //       data: {
+  //         cpf,
+  //         password: hashedPassword,
+  //         name,
+  //         type_beneficiary,
+  //         enrollment,
+  //       },
+  //     })
 
-      return {
-        status: 201,
-        message: 'Account created successfully',
-        result: result.cpf,
-      }
-    }),
+  //     return {
+  //       status: 201,
+  //       message: 'Account created successfully',
+  //       result: result.cpf,
+  //     }
+  //   }),
   uploadPdf: t.procedure
-    .input(beneficiaryPdfFileSchema)
-    .mutation(async ({ input, ctx }) => {
-    const { cpf, fileName, fileType, year, month, file } = input
+  .input(beneficiaryPdfFileSchema)
+  .mutation(async ({ input, ctx }) => {
+    const { cpf, name, enrollment, fileName, fileType, year, month, file } =
+      input
 
     // Verify that the user is authorized to perform this action
     // const isAdmin = await ctx.prisma.adminUser.findFirst({
@@ -91,45 +93,69 @@ export const serverRouter = t.router({
     //   })
     // }
 
-    // Convert the base64 string to a binary buffer
-    const fileBuffer = Buffer.from(file, 'base64')
+    const exists = await ctx.prisma.beneficiaryUser.findFirst({
+      where: { cpf },
+    })
+
+    if (!exists) {
+      const hashedPassword = await hash(enrollment.toString())
+
+      const result = await ctx.prisma.beneficiaryUser.create({
+        data: {
+          cpf,
+          password: hashedPassword,
+          name,
+          type_beneficiary: 'BENEFICIARY',
+          enrollment,
+        },
+      })
+
+      if (result) {
+        console.log('User created successfully')
+      } else {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'An error occurred while creating the user',
+        })
+      }
+    }
+
+    console.log({
+      cpf,
+      fileName,
+      fileType: fileType as PdfFileType,
+      year,
+      month,
+      file
+    })
 
     // Create the PDF file in the database
-    await ctx.prisma.beneficiaryPdfFile.create({
+    const createFilePdfBeneficiary = await ctx.prisma.beneficiaryPdfFile.create({
       data: {
         cpf,
         fileName,
         fileType: fileType as PdfFileType,
         year,
         month,
-        file: fileBuffer,
-      }
+        file,
+      },
     })
 
-    return { success: true, error: null }
-  }),
-  verifyIfBeneficiaryExists: t.procedure
-    .input(beneficiaryCPFSchema)
-    .query(async ({ input, ctx }) => {
-      const { cpf } = input
-
-      const exists = await ctx.prisma.beneficiaryUser.findFirst({
-        where: { cpf },
+    if (!createFilePdfBeneficiary) {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'An error occurred while creating the PDF file',
       })
-
-      if (!exists) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'User not found.',
-        })
-      }
-
+    } else {
+      console.log('PDF file created successfully')
+      
       return {
-        status: 200,
-        message: 'User found successfully',
-        result: exists.cpf,
+        status: 201,
+        message: 'PDF file uploaded successfully',
+        result: fileName,
       }
-    }),
+    }
+  }),
   getBeneficiaryPdfFiles: t.procedure
     .input(beneficiaryCPFSchema)
     .query(async ({ input, ctx }) => {

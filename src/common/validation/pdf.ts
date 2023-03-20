@@ -5,15 +5,15 @@ export const beneficiaryPdfFileTypeSchema = z.enum([
   'DEMOSTRATIVO_ANUAL',
 ])
 
-export const base64StringSchema = z.string().regex(/^data:.*;base64,/)
-
 export const beneficiaryPdfFileSchema = z.object({
   cpf: z.string(),
+  name: z.string().optional(),
+  enrollment: z.number(),
   fileName: z.string(),
   fileType: beneficiaryPdfFileTypeSchema,
   year: z.number().optional(),
   month: z.number().optional(),
-  file: base64StringSchema,
+  file: z.string()
 })
 
 export type IBeneficiaryPdfFileType = z.infer<typeof beneficiaryPdfFileTypeSchema>
