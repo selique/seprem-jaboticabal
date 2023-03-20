@@ -3,12 +3,10 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 
 import Button from '@/components/atoms/Button'
 import InputField from '@/components/atoms/InputField'
-import { trpc } from '@common/trpc'
 import { ISignUp, signUpSchema } from '@common/validation/auth'
 
 const SignUp: NextPage = () => {
@@ -22,23 +20,23 @@ const SignUp: NextPage = () => {
     resolver: zodResolver(signUpSchema),
   })
 
-  const { mutateAsync } = trpc.signup.useMutation()
+  // const { mutateAsync } = trpc.signup.useMutation()
 
-  const onSubmit = useCallback(
-    async (data: ISignUp) => {
-      console.log(data)
-      try {
-        const result = await mutateAsync(data)
-        if (result.status === 201) {
-          reset()
-          router.push('/')
-        }
-      } catch (err) {
-        console.error(err)
-      }
-    },
-    [mutateAsync, router, reset]
-  )
+  // const onSubmit = useCallback(
+  //   async (data: ISignUp) => {
+  //     console.log(data)
+  //     try {
+  //       // const result = await mutateAsync(data)
+  //       if (result.status === 201) {
+  //         reset()
+  //         router.push('/')
+  //       }
+  //     } catch (err) {
+  //       console.error(err)
+  //     }
+  //   },
+  //   [mutateAsync, router, reset]
+  // )
 
   return (
     <div>
@@ -51,7 +49,7 @@ const SignUp: NextPage = () => {
       <main className="flex items-center justify-center h-screen w-full">
         <form
           className="bg-gray-100 rounded px-8 pt-6 pb-8 mb-4"
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={handleSubmit(() => console.log('teste signin'))}
         >
           <InputField
             id="cpf"
