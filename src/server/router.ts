@@ -103,6 +103,7 @@ export const serverRouter = t.router({
           result: fileName,
         }
       }
+      
       const beneficiaryExists = await ctx.prisma.beneficiaryUser.findFirst({
         where: { cpf },
       })
@@ -173,16 +174,17 @@ export const serverRouter = t.router({
     .query(async ({ input, ctx }) => {
       const { cpf } = input
 
-      const exists = await ctx.prisma.beneficiaryUser.findFirst({
-        where: { cpf },
-      })
-
-      if (!exists) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'User not found.',
-        })
-      }
+      // Verify that the user is authorized to perform this action
+      // const isAdmin = await ctx.prisma.adminUser.findFirst({
+      //   where: { email: (ctx.session as any)?.user?.email ?? '' },
+      // })
+      // if (!isAdmin) {
+      //   throw new TRPCError({
+      //     code: 'UNAUTHORIZED',
+      //     message: 'You are not authorized to perform this action',
+      //   })
+      // }
+      
 
       const pdfFiles = await ctx.prisma.beneficiaryPdfFile.findMany({
         where: { cpf },

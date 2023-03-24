@@ -5,7 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import type { NextPage } from 'next'
 import { signIn } from 'next-auth/react'
 import Head from 'next/head'
-import { useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 
 const Home: NextPage = () => {
@@ -17,8 +16,7 @@ const Home: NextPage = () => {
     resolver: zodResolver(loginSchema),
   })
 
-  const onSubmit = useCallback(
-    async (data: ILogin) => {
+  const onSubmitSignIn = async (data: ILogin) => {
       console.log(data)
       try {
         await signIn('credentials', { ...data, callbackUrl: '/dashboard' })
@@ -27,9 +25,7 @@ const Home: NextPage = () => {
         // handle unexpected error
         console.error(error)
       }
-    },
-    [reset]
-  )
+  }
 
   return (
     <>
@@ -42,7 +38,7 @@ const Home: NextPage = () => {
       <main className="flex items-center justify-center h-screen w-full">
         <form
           className="bg-gray-100 rounded px-8 pt-6 pb-8 mb-4"
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={handleSubmit(onSubmitSignIn)}
         >
           <InputField
             id="cpf"
