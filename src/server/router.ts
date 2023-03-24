@@ -1,9 +1,7 @@
 import { initTRPC, TRPCError } from '@trpc/server'
 import { hash } from 'argon2'
 
-import {
-  beneficiaryCPFSchema
-} from '@common/validation/auth'
+import { beneficiaryCPFSchema } from '@common/validation/auth'
 import { beneficiaryPdfFileSchema } from '@common/validation/pdf'
 import { IContext } from '@server/context'
 
@@ -77,86 +75,99 @@ export const serverRouter = t.router({
   //     }
   //   }),
   uploadPdf: t.procedure
-  .input(beneficiaryPdfFileSchema)
-  .mutation(async ({ input, ctx }) => {
-    const { cpf, name, enrollment, fileName, fileType, year, month, file } =
-      input
+    .input(beneficiaryPdfFileSchema)
+    .mutation(async ({ input, ctx }) => {
+      const { cpf, name, enrollment, fileName, fileType, year, month, file } =
+        input
 
-    // Verify that the user is authorized to perform this action
-    // const isAdmin = await ctx.prisma.adminUser.findFirst({
-    //   where: { email: (ctx.session as any)?.user?.email ?? '' },
-    // })
-    // if (!isAdmin) {
-    //   throw new TRPCError({
-    //     code: 'UNAUTHORIZED',
-    //     message: 'You are not authorized to perform this action',
-    //   })
-    // }
+      // Verify that the user is authorized to perform this action
+      // const isAdmin = await ctx.prisma.adminUser.findFirst({
+      //   where: { email: (ctx.session as any)?.user?.email ?? '' },
+      // })
+      // if (!isAdmin) {
+      //   throw new TRPCError({
+      //     code: 'UNAUTHORIZED',
+      //     message: 'You are not authorized to perform this action',
+      //   })
+      // }
 
-    const exists = await ctx.prisma.beneficiaryUser.findFirst({
-      where: { cpf },
+      // Check if the file name already exists in the database
+      const fileExists = await ctx.prisma.beneficiaryPdfFile.findFirst({
+        where: { fileName },
       })
 
-      if (!exists) {
+      if (fileExists) {
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: 'File already exists.',
+        })
+      }
+
+      const beneficiaryExists = await ctx.prisma.beneficiaryUser.findFirst({
+        where: { cpf },
+      })
+
+      if (!beneficiaryExists) {
         const enrollmentStr = enrollment.toString()
         const hashedPassword = await hash(enrollmentStr)
 
         const result = await ctx.prisma.beneficiaryUser.create({
           data: {
-          cpf,
-          password: hashedPassword,
-          name,
-          type_beneficiary: 'BENEFICIARY',
-          enrollment
-        },
-      })
-
-      if (result) {
-        console.log('User created successfully')
-      } else {
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'An error occurred while creating the user',
+            cpf,
+            password: hashedPassword,
+            name,
+            type_beneficiary: 'BENEFICIARY',
+            enrollment,
+          },
         })
+
+        if (result) {
+          console.log('User created successfully')
+        } else {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'An error occurred while creating the user',
+          })
+        }
       }
-    }
 
-    console.log({
-      cpf,
-      fileName,
-      fileType: fileType as PdfFileType,
-      year,
-      month,
-      file
-    })
-
-    // Create the PDF file in the database
-    const createFilePdfBeneficiary = await ctx.prisma.beneficiaryPdfFile.create({
-      data: {
+      console.log({
         cpf,
         fileName,
         fileType: fileType as PdfFileType,
         year,
         month,
         file,
-      },
-    })
-
-    if (!createFilePdfBeneficiary) {
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'An error occurred while creating the PDF file',
       })
-    } else {
-      console.log('PDF file created successfully')
-      
-      return {
-        status: 201,
-        message: 'PDF file uploaded successfully',
-        result: fileName,
+
+      // Create the PDF file in the database
+      const createFilePdfBeneficiary =
+        await ctx.prisma.beneficiaryPdfFile.create({
+          data: {
+            cpf,
+            fileName,
+            fileType: fileType as PdfFileType,
+            year,
+            month,
+            file,
+          },
+        })
+
+      if (!createFilePdfBeneficiary) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'An error occurred while creating the PDF file',
+        })
+      } else {
+        console.log('PDF file created successfully')
+
+        return {
+          status: 201,
+          message: 'PDF file uploaded successfully',
+          result: fileName,
+        }
       }
-    }
-  }),
+    }),
   getBeneficiaryPdfFiles: t.procedure
     .input(beneficiaryCPFSchema)
     .query(async ({ input, ctx }) => {
