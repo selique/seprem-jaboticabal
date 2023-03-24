@@ -1,22 +1,7 @@
 import * as z from 'zod'
 
 export const loginSchema = z.object({
-  cpf: z
-    .string()
-    .min(11)
-    .max(11)
-    .refine(
-      (value) => {
-        if (value) {
-          return value.length === 11
-        }
-        return true
-      },
-      {
-        message: 'CPF deve ter 11 dígitos',
-        path: ['cpf'],
-      }
-    ),
+  cpf: z.string(),
   password: z.string(),
   // todo: add password validation based on the requirements enrollment field on schema database
   // .min(4).max(12),
@@ -28,14 +13,14 @@ export const signUpSchema = loginSchema.extend({
 })
 
 export const beneficiarySchema = z.object({
-  cpf: z.string().min(11).max(11),
+  cpf: z.string(),
   name: z.string(),
   type_beneficiary: z.string().optional(),
   enrollment: z.number(),
 })
 
 export const beneficiaryCPFSchema = z.object({
-  cpf: z.string().min(11).max(11),
+  cpf: z.string(),
 })
 
 export type IBeneficiaryCPF = z.infer<typeof beneficiaryCPFSchema>
