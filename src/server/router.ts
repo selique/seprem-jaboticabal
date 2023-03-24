@@ -97,12 +97,12 @@ export const serverRouter = t.router({
       })
 
       if (fileExists) {
-        throw new TRPCError({
-          code: 'CONFLICT',
+        return {
+          status: 409,
           message: 'File already exists.',
-        })
+          result: fileName,
+        }
       }
-
       const beneficiaryExists = await ctx.prisma.beneficiaryUser.findFirst({
         where: { cpf },
       })
