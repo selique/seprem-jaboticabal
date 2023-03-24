@@ -8,7 +8,7 @@ import {
   FaTimesCircle,
 } from 'react-icons/fa'
 
-type UploadStatus = 'UPLOADING' | 'SUCCESS' | 'DUPLICATE' | 'FAILED' | 'UNKNOWN'
+type UploadStatus = 'UPLOADING' | 'DUPLICATE' | 'SUCCESS' | 'FAILED' | 'UNKNOWN'
 
 interface UploadPdfProps {
   year: number
@@ -20,7 +20,8 @@ interface UploadPdfProps {
   fileType: 'HOLERITE' | 'DEMOSTRATIVO_ANUAL'
   file: string
 }
-interface UploadLogItem {
+
+type UploadLogItem = {
   name: string
   status: UploadStatus
 }
@@ -51,7 +52,7 @@ const UploadPdf: NextPage = () => {
     pdf,
   }: any) => {
     try {
-      if (pdf.file) {
+      if (pdf && pdf.file) {
         console.log('pdf file is present')
         const input: UploadPdfProps = {
           year,
@@ -67,33 +68,61 @@ const UploadPdf: NextPage = () => {
         console.log('Uploading PDF')
         const result = await uploadPdfMutation.mutateAsync(input)
 
-        // find the index of the PDF file in the upload log
+        // find the index of the item in uploadLog with the same name as the uploaded file
         const index = uploadLog.findIndex((item) => item.name === pdf.fileName)
 
-        // create a new array with the updated status for the PDF file
-        const updatedLog = [...uploadLog]
-        updatedLog[index].status =
-          result.status === 409
-            ? 'DUPLICATE'
-            : result.status === 201
-            ? 'SUCCESS'
-            : 'UNKNOWN'
-
-        // update the upload log state
-        setUploadLog(updatedLog)
+        if (result.status === 409) {
+          if (index !== -1) {
+            // update the status of the existing item in uploadLog
+            const newUploadLog = [...uploadLog]
+            newUploadLog[index].status = 'DUPLICATE'
+            setUploadLog(newUploadLog)
+          } else {
+            // add a new item to uploadLog
+            setUploadLog((prevLog) => [
+              ...prevLog,
+              { name: pdf.fileName, status: 'DUPLICATE' },
+            ])
+          }
+        } else if (result.status === 201) {
+          console.log('PDF uploaded successfully:', result)
+          if (index !== -1) {
+            // update the status of the existing item in uploadLog
+            const newUploadLog = [...uploadLog]
+            newUploadLog[index].status = 'SUCCESS'
+            setUploadLog(newUploadLog)
+          } else {
+            // add a new item to uploadLog
+            setUploadLog((prevLog) => [
+              ...prevLog,
+              { name: pdf.fileName, status: 'SUCCESS' },
+            ])
+          }
+        } else {
+          if (index !== -1) {
+            // update the status of the existing item in uploadLog
+            const newUploadLog = [...uploadLog]
+            newUploadLog[index].status = 'UNKNOWN'
+            setUploadLog(newUploadLog)
+          } else {
+            // add a new item to uploadLog
+            setUploadLog((prevLog) => [
+              ...prevLog,
+              { name: pdf.fileName, status: 'UNKNOWN' },
+            ])
+          }
+        }
       }
     } catch (error) {
-      console.error(`Error processing PDF: ${error}`)
+      console.error(`Error processing: ${error}`)
 
-      // find the index of the PDF file in the upload log
-      const index = uploadLog.findIndex((item) => item.name === pdf.fileName)
-
-      // create a new array with the updated status for the PDF file
-      const updatedLog = [...uploadLog]
-      updatedLog[index].status = 'FAILED'
-
-      // update the upload log state
-      setUploadLog(updatedLog)
+      if (pdf) {
+        // add a new item to uploadLog
+        setUploadLog((prevLog) => [
+          ...prevLog,
+          { name: pdf.fileName, status: 'FAILED' },
+        ])
+      }
     }
   }
 
@@ -208,11 +237,16 @@ const UploadPdf: NextPage = () => {
             type="file"
             accept="application/pdf"
             onChange={handleFileChange}
-            className="sr-only"
+            className="sr-only "
+            disabled={isUploading}
           />
           <label
             htmlFor="pdf"
-            className="px-4 py-2 text-lg font-medium text-white bg-blue-600 rounded-md cursor-pointer hover:bg-blue-700"
+            className={`px-4 py-2 text-lg font-medium text-white rounded-md cursor-pointer  ${
+              isUploading
+                ? 'bg-gray-400 hover:bg-gray-300'
+                : 'bg-blue-600 hover:bg-blue-700'
+            }`}
           >
             {file ? file.name : 'Choose a file'}
           </label>
@@ -223,7 +257,7 @@ const UploadPdf: NextPage = () => {
           disabled={isUploading}
         >
           {isUploading ? (
-            <FaSpinner className="animate-spin mr-2" />
+            <FaSpinner className="animate-spin mr-auto" />
           ) : (
             'Upload PDF'
           )}
@@ -276,15 +310,25 @@ const UploadPdf: NextPage = () => {
                 key={index}
                 className={`flex items-center py-2 ${
                   item.status === 'SUCCESS'
-                    ? 'bg-green-100 text-green-500'
+                    ? 'bg-green-300 text-green-700'
                     : item.status === 'DUPLICATE'
-                    ? 'bg-yellow-100 text-yellow-500'
-                    : 'bg-red-100 text-red-500'
+                    ? 'bg-yellow-300 text-yellow-700'
+                    : 'bg-red-300 text-red-700'
                 }`}
+                style={{
+                  backgroundColor:
+                    item.status === 'SUCCESS'
+                      ? '#C8E6C9'
+                      : item.status === 'DUPLICATE'
+                      ? '#FFF9C4'
+                      : '#FFCDD2',
+                  borderRadius: '4px',
+                }}
               >
-                {getStatusIcon(item.status)}
-                <span>{item.name}</span>
-                <span className="ml-auto">{getStatusIcon(item.status)}</span>
+                <div className="flex items-center w-full mx-2">
+                  <span className="flex-grow">{item.name}</span>
+                  <span className="ml-4">{getStatusIcon(item.status)}</span>
+                </div>
               </div>
             ))}
           </div>
