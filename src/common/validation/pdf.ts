@@ -13,9 +13,11 @@ export const beneficiaryPdfFileSchema = z.object({
   fileType: beneficiaryPdfFileTypeSchema,
   year: z.number().optional(),
   month: z.number().optional(),
-  file: z.string()
+  file: z.string(),
 })
 
-export type IBeneficiaryPdfFileType = z.infer<typeof beneficiaryPdfFileTypeSchema>
+export type IBeneficiaryPdfFileType = z.infer<
+  typeof beneficiaryPdfFileTypeSchema
+>
 
 export type IBeneficiaryPdfFile = z.infer<typeof beneficiaryPdfFileSchema>

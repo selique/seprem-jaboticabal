@@ -50,21 +50,21 @@ export default async function handler(req: any, res: any) {
         })
       )
 
-      const arrayResponseJson = [];
+      const arrayResponseJson = []
 
       for (const pageBuffer of pageBuffers) {
         try {
           const extractedData = await extractPdfData(pageBuffer as Buffer)
-      
+
           if (extractedData[0]) {
             const { cpf, year, month, name, enrollment } = extractedData[0]
             if (!cpf || !name || !enrollment) {
               console.error('Invalid data extracted from PDF')
               return res.status(400).send('Invalid input')
             }
-      
+
             const pageFileName = `${cpf}-${name}-${enrollment}-${month}-${year}.pdf`
-                  
+
             if (!cpf) {
               console.error('CPF is null or undefined')
               return res.status(400).send('Invalid input')
@@ -78,14 +78,14 @@ export default async function handler(req: any, res: any) {
               month,
               pdf: {
                 fileName: pageFileName,
-                file: Buffer.from(pageBuffer).toString('base64')
+                file: Buffer.from(pageBuffer).toString('base64'),
               },
-            };
-            arrayResponseJson.push(pdfObject);
+            }
+            arrayResponseJson.push(pdfObject)
           }
         } catch (error) {
-          console.error(`Error processing PDF: ${error}`);
-          return res.status(500).send(`Error processing PDF: ${error}`);
+          console.error(`Error processing PDF: ${error}`)
+          return res.status(500).send(`Error processing PDF: ${error}`)
         }
       }
 
