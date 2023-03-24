@@ -3,7 +3,7 @@ import { NextPage } from 'next'
 import { useState } from 'react'
 import {
   FaCheckCircle,
-  FaExclamation,
+  FaExclamationTriangle,
   FaSpinner,
   FaTimesCircle,
 } from 'react-icons/fa'
@@ -21,7 +21,7 @@ interface UploadPdfProps {
   file: string
 }
 interface UploadLogItem {
-  pdf: UploadPdfProps
+  name: string
   status: UploadStatus
 }
 
@@ -66,20 +66,34 @@ const UploadPdf: NextPage = () => {
 
         console.log('Uploading PDF')
         const result = await uploadPdfMutation.mutateAsync(input)
-        setUploadLog((prevLog) => [...prevLog, { pdf, status: 'UPLOADING' }])
-        if (result.status === 409) {
-          setUploadLog((prevLog) => [...prevLog, { pdf, status: 'DUPLICATE' }])
-        } else if (result.status === 201) {
-          console.log('PDF uploaded successfully:', result)
-          setUploadLog((prevLog) => [...prevLog, { pdf, status: 'SUCCESS' }])
-        } else {
-          setUploadLog((prevLog) => [...prevLog, { pdf, status: 'UNKNOWN' }])
-        }
+
+        // find the index of the PDF file in the upload log
+        const index = uploadLog.findIndex((item) => item.name === pdf.fileName)
+
+        // create a new array with the updated status for the PDF file
+        const updatedLog = [...uploadLog]
+        updatedLog[index].status =
+          result.status === 409
+            ? 'DUPLICATE'
+            : result.status === 201
+            ? 'SUCCESS'
+            : 'UNKNOWN'
+
+        // update the upload log state
+        setUploadLog(updatedLog)
       }
     } catch (error) {
       console.error(`Error processing PDF: ${error}`)
 
-      setUploadLog((prevLog) => [...prevLog, { pdf, status: 'FAILED' }])
+      // find the index of the PDF file in the upload log
+      const index = uploadLog.findIndex((item) => item.name === pdf.fileName)
+
+      // create a new array with the updated status for the PDF file
+      const updatedLog = [...uploadLog]
+      updatedLog[index].status = 'FAILED'
+
+      // update the upload log state
+      setUploadLog(updatedLog)
     }
   }
 
@@ -92,6 +106,9 @@ const UploadPdf: NextPage = () => {
 
     setIsUploading(true)
     setUploadLog([])
+    setUploadProgress(null) // reset the upload progress
+    setProcessedCountTotal(0) // reset the total count
+    setProcessedCount(0) // reset the processed count
     const formData = new FormData()
     formData.append('pdf', file)
 
@@ -147,9 +164,6 @@ const UploadPdf: NextPage = () => {
     } finally {
       console.log('Upload complete')
       setIsUploading(false)
-      setUploadProgress(null) // reset the upload progress
-      setProcessedCountTotal(0) // reset the total count
-      setProcessedCount(0) // reset the processed count
     }
   }
 
@@ -160,7 +174,7 @@ const UploadPdf: NextPage = () => {
       case 'SUCCESS':
         return <FaCheckCircle className="text-green-500 mr-2" />
       case 'DUPLICATE':
-        return <FaExclamation className="text-yellow-500 mr-2" />
+        return <FaExclamationTriangle className="text-yellow-500 mr-2" />
       case 'FAILED':
         return <FaTimesCircle className="text-red-500 mr-2" />
       default:
@@ -214,6 +228,20 @@ const UploadPdf: NextPage = () => {
             'Upload PDF'
           )}
         </button>
+        <div className="flex justify-center text-gray-500 text-sm mb-4">
+          <div className="flex items-center mr-4">
+            <FaCheckCircle className="mr-2 text-green-500" />
+            <span>Success</span>
+          </div>
+          <div className="flex items-center mr-4">
+            <FaExclamationTriangle className="mr-2 text-yellow-500" />
+            <span>Duplicate</span>
+          </div>
+          <div className="flex items-center">
+            <FaTimesCircle className="mr-2 text-red-500" />
+            <span>Failed/Unknown</span>
+          </div>
+        </div>
         {uploadProgress !== null && (
           <div className="flex items-center">
             <div className="relative flex-grow h-2 mr-2 bg-gray-200 rounded-full">
@@ -255,7 +283,7 @@ const UploadPdf: NextPage = () => {
                 }`}
               >
                 {getStatusIcon(item.status)}
-                <span>{item.file.fileName}</span>
+                <span>{item.name}</span>
                 <span className="ml-auto">{getStatusIcon(item.status)}</span>
               </div>
             ))}
