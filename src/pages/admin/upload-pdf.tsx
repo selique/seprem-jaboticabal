@@ -1,7 +1,29 @@
 import { trpc } from '@common/trpc'
 import { NextPage } from 'next'
 import { useState } from 'react'
-import { FaSpinner } from 'react-icons/fa'
+import {
+  FaCheckCircle,
+  FaExclamation,
+  FaSpinner,
+  FaTimesCircle,
+} from 'react-icons/fa'
+
+type UploadStatus = 'UPLOADING' | 'SUCCESS' | 'DUPLICATE' | 'FAILED' | 'UNKNOWN'
+
+interface UploadPdfProps {
+  year: number
+  month: number
+  cpf: string
+  name: string
+  enrollment: number
+  fileName: string
+  fileType: 'HOLERITE' | 'DEMOSTRATIVO_ANUAL'
+  file: string
+}
+interface UploadLogItem {
+  pdf: UploadPdfProps
+  status: UploadStatus
+}
 
 const UploadPdf: NextPage = () => {
   const [file, setFile] = useState<File | null>(null)
@@ -12,6 +34,7 @@ const UploadPdf: NextPage = () => {
   const [uploadProgress, setUploadProgress] = useState<number | null>(null)
   const [processedCount, setProcessedCount] = useState(0)
   const [processedCountTotal, setProcessedCountTotal] = useState(0)
+  const [uploadLog, setUploadLog] = useState<UploadLogItem[]>([])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFile(e.target.files?.[0] || null)
@@ -30,16 +53,7 @@ const UploadPdf: NextPage = () => {
     try {
       if (pdf.file) {
         console.log('pdf file is present')
-        const input: {
-          year: number
-          month: number
-          cpf: string
-          name: string
-          enrollment: number
-          fileName: string
-          fileType: 'HOLERITE' | 'DEMOSTRATIVO_ANUAL'
-          file: string
-        } = {
+        const input: UploadPdfProps = {
           year,
           month,
           cpf,
@@ -52,13 +66,20 @@ const UploadPdf: NextPage = () => {
 
         console.log('Uploading PDF')
         const result = await uploadPdfMutation.mutateAsync(input)
-        console.log('PDF uploaded successfully:', result)
-      } else {
-        console.log('pdf file is not present')
-        console.error('Invalid pdf object:', pdf)
+        setUploadLog((prevLog) => [...prevLog, { pdf, status: 'UPLOADING' }])
+        if (result.status === 409) {
+          setUploadLog((prevLog) => [...prevLog, { pdf, status: 'DUPLICATE' }])
+        } else if (result.status === 201) {
+          console.log('PDF uploaded successfully:', result)
+          setUploadLog((prevLog) => [...prevLog, { pdf, status: 'SUCCESS' }])
+        } else {
+          setUploadLog((prevLog) => [...prevLog, { pdf, status: 'UNKNOWN' }])
+        }
       }
     } catch (error) {
       console.error(`Error processing PDF: ${error}`)
+
+      setUploadLog((prevLog) => [...prevLog, { pdf, status: 'FAILED' }])
     }
   }
 
@@ -70,7 +91,7 @@ const UploadPdf: NextPage = () => {
     }
 
     setIsUploading(true)
-
+    setUploadLog([])
     const formData = new FormData()
     formData.append('pdf', file)
 
@@ -110,6 +131,7 @@ const UploadPdf: NextPage = () => {
       console.log('Parsing results')
       setProcessedCount(0) // reset the processed count
       setProcessedCountTotal(parsedResults.length) // set the total count
+      setUploadLog([]) // reset the upload log
       for (const result of parsedResults) {
         console.log('Processing result:', result)
         try {
@@ -118,9 +140,6 @@ const UploadPdf: NextPage = () => {
         } catch (error) {
           console.error(`Error processing result ${result}: ${error}`)
           // handle the error (e.g. show an error message to the user)
-        } finally {
-          setIsUploading(false)
-          console.log('Result processed')
         }
       }
     } catch (error) {
@@ -131,6 +150,21 @@ const UploadPdf: NextPage = () => {
       setUploadProgress(null) // reset the upload progress
       setProcessedCountTotal(0) // reset the total count
       setProcessedCount(0) // reset the processed count
+    }
+  }
+
+  const getStatusIcon = (status: UploadStatus) => {
+    switch (status) {
+      case 'UPLOADING':
+        return <FaSpinner className="animate-spin mr-2" />
+      case 'SUCCESS':
+        return <FaCheckCircle className="text-green-500 mr-2" />
+      case 'DUPLICATE':
+        return <FaExclamation className="text-yellow-500 mr-2" />
+      case 'FAILED':
+        return <FaTimesCircle className="text-red-500 mr-2" />
+      default:
+        return null
     }
   }
 
@@ -175,32 +209,60 @@ const UploadPdf: NextPage = () => {
           disabled={isUploading}
         >
           {isUploading ? (
-            <>
-              {uploadProgress !== null ? (
-                <div className="flex items-center space-x-4">
-                  <div className="w-24 h-2 bg-gray-200 rounded-full">
-                    <div
-                      className="h-full bg-green-500 rounded-full"
-                      style={{ width: `${uploadProgress}%` }}
-                    />
-                  </div>
-                  <div>{`${uploadProgress}%`}</div>
-                </div>
-              ) : (
-                <FaSpinner className="animate-spin mr-2" />
-              )}
-            </>
-          ) : null}
-          Upload PDF
+            <FaSpinner className="animate-spin mr-2" />
+          ) : (
+            'Upload PDF'
+          )}
         </button>
-        {processedCount > 0 ? (
-          <div className="mt-4 text-lg font-medium">
-            {`Processed ${processedCount} of ${processedCountTotal} results`}
+        {uploadProgress !== null && (
+          <div className="flex items-center">
+            <div className="relative flex-grow h-2 mr-2 bg-gray-200 rounded-full">
+              <div
+                className="absolute top-0 left-0 h-full bg-green-500 rounded-full"
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </div>
+            <span>{uploadProgress}%</span>
           </div>
-        ) : null}
+        )}
+        {processedCountTotal > 0 && (
+          <div className="flex items-center">
+            <span className="mr-2">{`${processedCount}/${processedCountTotal}`}</span>
+            <div className="relative flex-grow h-2 mr-2 bg-gray-200 rounded-full">
+              <div
+                className="absolute top-0 left-0 h-full bg-green-500 rounded-full"
+                style={{
+                  width: `${(processedCount / processedCountTotal) * 100}%`,
+                }}
+              />
+            </div>
+            <span>{`${Math.round(
+              (processedCount / processedCountTotal) * 100
+            )}%`}</span>
+          </div>
+        )}
+        {uploadLog.length > 0 && (
+          <div className="flex flex-col w-full mt-4">
+            {uploadLog.map((item, index) => (
+              <div
+                key={index}
+                className={`flex items-center py-2 ${
+                  item.status === 'SUCCESS'
+                    ? 'bg-green-100 text-green-500'
+                    : item.status === 'DUPLICATE'
+                    ? 'bg-yellow-100 text-yellow-500'
+                    : 'bg-red-100 text-red-500'
+                }`}
+              >
+                {getStatusIcon(item.status)}
+                <span>{item.file.fileName}</span>
+                <span className="ml-auto">{getStatusIcon(item.status)}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </form>
   )
 }
-
 export default UploadPdf
