@@ -4,12 +4,12 @@ const extractCpf = (item: string): string | null => {
   const regex = /CPF[\n\s]*(\d{3}\.\d{3}\.\d{3}\-\d{2})/
   const match = item.match(regex)?.[1]
   if (match) {
-    return match.replace(/[.-]/g, '')
+    return match
   } else {
     const regex = /\d{3}\.\d{3}\.\d{3}\-\d{2}/
     const match = item.match(regex)
     const cpf = match ? match[0] : null
-    return cpf?.replace(/[.-]/g, '') ?? null
+    return cpf ?? null
   }
 }
 
