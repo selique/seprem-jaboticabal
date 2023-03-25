@@ -13,6 +13,9 @@ const getBaseUrl = () => {
   if (process.env.RENDER_INTERNAL_HOSTNAME)
     // reference for render.com
     return `http://${process.env.RENDER_INTERNAL_HOSTNAME}:${process.env.PORT}`
+  if (process.env.NETLIFY)
+    // reference for netlify.com
+    return `https://${process.env.CONTEXT}.netlify.app`
   // assume localhost
   return `http://localhost:${process.env.PORT ?? 3000}`
 }
