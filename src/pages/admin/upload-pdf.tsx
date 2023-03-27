@@ -14,7 +14,7 @@ type UploadStatus = 'UPLOADING' | 'DUPLICATE' | 'SUCCESS' | 'FAILED' | 'UNKNOWN'
 
 type UploadLogItem = {
   name: string
-  status: UploadStatus
+  status: string | UploadStatus
 }
 
 type IBeneficiaryWithPdf = IBeneficiary & IBeneficiaryPdfFile;
@@ -69,7 +69,7 @@ const UploadPdf: NextPage = () => {
   
       const result = await uploadPdfMutation.mutateAsync(input);
   
-      const uploadLogItem = { name: pdf.fileName };
+      const uploadLogItem = { name: pdf.fileName, status: '' };
   
       switch (result.status) {
         case 409:
@@ -86,7 +86,7 @@ const UploadPdf: NextPage = () => {
         const newUploadLog = [...prevLog];
         const index = newUploadLog.findIndex((item) => item.name === pdf.fileName);
         if (index !== -1) {
-          newUploadLog[index] = uploadLogItem;
+          newUploadLog[index] = { ...newUploadLog[index], status: uploadLogItem.status };
         } else {
           newUploadLog.push(uploadLogItem);
         }
@@ -177,7 +177,7 @@ const UploadPdf: NextPage = () => {
     }
   }
 
-  const getStatusIcon = (status: UploadStatus) => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
       case 'UPLOADING':
         return <FaSpinner className="text-blue-500 animate-spin mr-2" />
@@ -188,7 +188,7 @@ const UploadPdf: NextPage = () => {
       case 'FAILED':
         return <FaTimesCircle className="text-red-500 mr-2" />
       default:
-        return null
+        return <span></span>
     }
   }
 
