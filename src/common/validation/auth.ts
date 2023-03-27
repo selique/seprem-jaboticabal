@@ -12,19 +12,5 @@ export const signUpSchema = loginSchema.extend({
   password: z.string(),
 })
 
-export const beneficiarySchema = z.object({
-  cpf: z.string(),
-  name: z.string(),
-  type_beneficiary: z.string().optional(),
-  enrollment: z.number(),
-})
-
-export const beneficiaryCPFSchema = z.object({
-  cpf: z.string(),
-})
-
-export type IBeneficiaryCPF = z.infer<typeof beneficiaryCPFSchema>
-
 export type ILogin = z.infer<typeof loginSchema>
 export type ISignUp = z.infer<typeof signUpSchema>
-export type IBeneficiary = z.infer<typeof beneficiarySchema>

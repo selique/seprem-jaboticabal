@@ -52,79 +52,68 @@ const UploadPdf: NextPage = () => {
     pdf,
   }: any) => {
     try {
-      if (pdf && pdf.file) {
-        console.log('pdf file is present')
-        const input: UploadPdfProps = {
-          year,
-          month,
-          cpf,
-          name,
-          enrollment: Number(enrollment),
-          fileName: pdf.fileName,
-          fileType: fileType,
-          file: pdf.file,
-        }
-
-        console.log('Uploading PDF')
-        const result = await uploadPdfMutation.mutateAsync(input)
-
-        // find the index of the item in uploadLog with the same name as the uploaded file
-        const index = uploadLog.findIndex((item) => item.name === pdf.fileName)
-
-        if (result.status === 409) {
-          if (index !== -1) {
-            // update the status of the existing item in uploadLog
-            const newUploadLog = [...uploadLog]
-            newUploadLog[index].status = 'DUPLICATE'
-            setUploadLog(newUploadLog)
-          } else {
-            // add a new item to uploadLog
-            setUploadLog((prevLog) => [
-              ...prevLog,
-              { name: pdf.fileName, status: 'DUPLICATE' },
-            ])
-          }
-        } else if (result.status === 201) {
-          console.log('PDF uploaded successfully:', result)
-          if (index !== -1) {
-            // update the status of the existing item in uploadLog
-            const newUploadLog = [...uploadLog]
-            newUploadLog[index].status = 'SUCCESS'
-            setUploadLog(newUploadLog)
-          } else {
-            // add a new item to uploadLog
-            setUploadLog((prevLog) => [
-              ...prevLog,
-              { name: pdf.fileName, status: 'SUCCESS' },
-            ])
-          }
+      if (!pdf || !pdf.file) return;
+  
+      console.log('pdf file is present');
+      
+      const input: UploadPdfProps = {
+        year,
+        month,
+        cpf,
+        name,
+        enrollment: Number(enrollment),
+        fileName: pdf.fileName,
+        fileType: fileType,
+        file: pdf.file,
+      };
+  
+      setUploadLog((prevLog) => [
+        ...prevLog,
+        { name: pdf.fileName, status: 'UPLOADING' },
+      ]);
+  
+      console.log('Uploading PDF');
+  
+      const result = await uploadPdfMutation.mutateAsync(input);
+  
+      const uploadLogItem = { name: pdf.fileName };
+  
+      switch (result.status) {
+        case 409:
+          uploadLogItem.status = 'DUPLICATE';
+          break;
+        case 201:
+          uploadLogItem.status = 'SUCCESS';
+          break;
+        default:
+          uploadLogItem.status = 'UNKNOWN';
+      }
+  
+      setUploadLog((prevLog) => {
+        const newUploadLog = [...prevLog];
+        const index = newUploadLog.findIndex((item) => item.name === pdf.fileName);
+        if (index !== -1) {
+          newUploadLog[index] = uploadLogItem;
         } else {
-          if (index !== -1) {
-            // update the status of the existing item in uploadLog
-            const newUploadLog = [...uploadLog]
-            newUploadLog[index].status = 'UNKNOWN'
-            setUploadLog(newUploadLog)
-          } else {
-            // add a new item to uploadLog
-            setUploadLog((prevLog) => [
-              ...prevLog,
-              { name: pdf.fileName, status: 'UNKNOWN' },
-            ])
-          }
+          newUploadLog.push(uploadLogItem);
         }
+        return newUploadLog;
+      });
+  
+      if (uploadLogItem.status === 'SUCCESS') {
+        console.log('PDF uploaded successfully:', result);
       }
     } catch (error) {
-      console.error(`Error processing: ${error}`)
-
+      console.error(`Error processing: ${error}`);
+      
       if (pdf) {
-        // add a new item to uploadLog
         setUploadLog((prevLog) => [
           ...prevLog,
           { name: pdf.fileName, status: 'FAILED' },
-        ])
+        ]);
       }
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -179,7 +168,6 @@ const UploadPdf: NextPage = () => {
       setProcessedCountTotal(parsedResults.length) // set the total count
       setUploadLog([]) // reset the upload log
       for (const result of parsedResults) {
-        console.log('Processing result:', result)
         try {
           await processPDFResult(result)
           setProcessedCount((count) => count + 1) // increment the processed count
@@ -189,7 +177,7 @@ const UploadPdf: NextPage = () => {
         }
       }
     } catch (error) {
-      console.error(error)
+      console.log(error)
     } finally {
       console.log('Upload complete')
       setIsUploading(false)
@@ -199,7 +187,7 @@ const UploadPdf: NextPage = () => {
   const getStatusIcon = (status: UploadStatus) => {
     switch (status) {
       case 'UPLOADING':
-        return <FaSpinner className="animate-spin mr-2" />
+        return <FaSpinner className="text-blue-500 animate-spin mr-2" />
       case 'SUCCESS':
         return <FaCheckCircle className="text-green-500 mr-2" />
       case 'DUPLICATE':
@@ -264,16 +252,20 @@ const UploadPdf: NextPage = () => {
         </button>
         <div className="flex justify-center text-gray-500 text-sm mb-4">
           <div className="flex items-center mr-4">
+            <FaCheckCircle className="mr-2 text-blue-500" />
+            <span>Uploading {processedCountTotal - processedCount}</span>
+          </div>
+          <div className="flex items-center mr-4">
             <FaCheckCircle className="mr-2 text-green-500" />
-            <span>Success</span>
+            <span>Success {uploadLog.filter((log) => log.status === 'SUCCESS').length}</span>
           </div>
           <div className="flex items-center mr-4">
             <FaExclamationTriangle className="mr-2 text-yellow-500" />
-            <span>Duplicate</span>
+            <span>Duplicate {uploadLog.filter((log) => log.status === 'DUPLICATE').length}</span>
           </div>
           <div className="flex items-center">
             <FaTimesCircle className="mr-2 text-red-500" />
-            <span>Failed/Unknown</span>
+            <span>Failed/Unknown {uploadLog.filter((log) => log.status === 'FAILED' || log.status === 'UNKNOWN').length}</span>
           </div>
         </div>
         {uploadProgress !== null && (
@@ -305,11 +297,13 @@ const UploadPdf: NextPage = () => {
         )}
         {uploadLog.length > 0 && (
           <div className="flex flex-col w-full mt-4">
-            {uploadLog.map((item, index) => (
+            {[...uploadLog].reverse().map((item, index) => (
               <div
                 key={index}
-                className={`flex items-center py-2 ${
-                  item.status === 'SUCCESS'
+                className={`flex items-center py-2 ${ 
+                  item.status === 'UPLOADING'
+                    ? 'bg-blue-300 text-blue-700'
+                    : item.status === 'SUCCESS'
                     ? 'bg-green-300 text-green-700'
                     : item.status === 'DUPLICATE'
                     ? 'bg-yellow-300 text-yellow-700'
@@ -317,7 +311,9 @@ const UploadPdf: NextPage = () => {
                 }`}
                 style={{
                   backgroundColor:
-                    item.status === 'SUCCESS'
+                  item.status === 'UPLOADING'
+                  ? 'bg-blue-300 text-blue-700'
+                  : item.status === 'SUCCESS'
                       ? '#C8E6C9'
                       : item.status === 'DUPLICATE'
                       ? '#FFF9C4'

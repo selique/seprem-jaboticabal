@@ -1,9 +1,11 @@
 import { initTRPC, TRPCError } from '@trpc/server'
 import { hash } from 'argon2'
 
-import { beneficiaryCPFSchema } from '@common/validation/auth'
+import { beneficiarySchema } from '@common/validation/beneficiary'
 import { beneficiaryPdfFileSchema } from '@common/validation/pdf'
 import { IContext } from '@server/context'
+import * as z from 'zod'
+
 
 type PdfFileType = 'HOLERITE' | 'DESMOTRATIVO_ANUAL'
 
@@ -75,7 +77,7 @@ export const serverRouter = t.router({
   //     }
   //   }),
   uploadPdf: t.procedure
-    .input(beneficiaryPdfFileSchema)
+    .input(z.object({...beneficiaryPdfFileSchema.shape, ...beneficiarySchema.shape}).catchall(z.any()))
     .mutation(async ({ input, ctx }) => {
       const { cpf, name, enrollment, fileName, fileType, year, month, file } =
         input
@@ -132,15 +134,6 @@ export const serverRouter = t.router({
         }
       }
 
-      console.log({
-        cpf,
-        fileName,
-        fileType: fileType as PdfFileType,
-        year,
-        month,
-        file,
-      })
-
       // Create the PDF file in the database
       const createFilePdfBeneficiary =
         await ctx.prisma.beneficiaryPdfFile.create({
@@ -170,7 +163,7 @@ export const serverRouter = t.router({
       }
     }),
   getBeneficiaryPdfFiles: t.procedure
-    .input(beneficiaryCPFSchema)
+    .input(z.object({ cpf: z.string() }).catchall(z.any()))
     .query(async ({ input, ctx }) => {
       const { cpf } = input
 
@@ -194,6 +187,40 @@ export const serverRouter = t.router({
         status: 200,
         message: 'User found successfully',
         result: pdfFiles,
+      }
+    }),
+  checkExistingPdfFile: t.procedure
+    .input(beneficiaryPdfFileSchema.pick({ fileName: true }))
+    .query(async ({ input, ctx }) => {
+      const { fileName } = input
+
+      // Verify that the user is authorized to perform this action
+      // const isAdmin = await ctx.prisma.adminUser.findFirst({
+      //   where: { email: (ctx.session as any)?.user?.email ?? '' },
+      // })
+      // if (!isAdmin) {
+      //   throw new TRPCError({
+      //     code: 'UNAUTHORIZED',
+      //     message: 'You are not authorized to perform this action',
+      //   })
+      // }
+
+      const pdfFile = await ctx.prisma.beneficiaryPdfFile.findFirst({
+        where: { fileName },
+      });
+
+      if (!pdfFile) {
+        return {
+          status: 404,
+          message: 'PDF file does not exist',
+          result: false,
+        };
+      } else {
+        return {
+          status: 409,
+          message: 'PDF file exists',
+          result: true,
+        };
       }
     }),
 })

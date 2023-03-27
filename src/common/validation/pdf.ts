@@ -1,23 +1,18 @@
 import * as z from 'zod'
 
-export const beneficiaryPdfFileTypeSchema = z.enum([
-  'HOLERITE',
-  'DEMOSTRATIVO_ANUAL',
-])
-
 export const beneficiaryPdfFileSchema = z.object({
   cpf: z.string(),
-  name: z.string().optional(),
-  enrollment: z.number(),
   fileName: z.string(),
-  fileType: beneficiaryPdfFileTypeSchema,
-  year: z.number().optional(),
-  month: z.number().optional(),
+  fileType: z.enum(['HOLERITE', 'DESMOTRATIVO_ANUAL']),
   file: z.string(),
+  year: z.number(),
+  month: z.number(),
 })
 
-export type IBeneficiaryPdfFileType = z.infer<
-  typeof beneficiaryPdfFileTypeSchema
+export const beneficiaryPdfFileSchemaArray = z.array(beneficiaryPdfFileSchema)
+
+export type IBeneficiaryPdfFileSchemaArray = z.infer<
+  typeof beneficiaryPdfFileSchemaArray
 >
 
 export type IBeneficiaryPdfFile = z.infer<typeof beneficiaryPdfFileSchema>

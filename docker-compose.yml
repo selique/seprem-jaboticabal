@@ -1,0 +1,9 @@
+# docker-compose.yml
+
+version: '3.8'
+services:
+  nextjs:
+    build: .
+    container_name: seprem-front-end
+    ports:
+      - '3000:3000'
