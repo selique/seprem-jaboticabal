@@ -1,3 +1,5 @@
+import { IBeneficiary } from '@/common/validation/beneficiary'
+import { IBeneficiaryPdfFile, IFileType } from '@/common/validation/pdf'
 import { trpc } from '@common/trpc'
 import { NextPage } from 'next'
 import { useState } from 'react'
@@ -10,26 +12,17 @@ import {
 
 type UploadStatus = 'UPLOADING' | 'DUPLICATE' | 'SUCCESS' | 'FAILED' | 'UNKNOWN'
 
-interface UploadPdfProps {
-  year: number
-  month: number
-  cpf: string
-  name: string
-  enrollment: number
-  fileName: string
-  fileType: 'HOLERITE' | 'DEMOSTRATIVO_ANUAL'
-  file: string
-}
-
 type UploadLogItem = {
   name: string
   status: UploadStatus
 }
 
+type IBeneficiaryWithPdf = IBeneficiary & IBeneficiaryPdfFile;
+
 const UploadPdf: NextPage = () => {
   const [file, setFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
-  const [fileType, setFileType] = useState<'HOLERITE' | 'DEMOSTRATIVO_ANUAL'>(
+  const [fileType, setFileType] = useState<IFileType>(
     'HOLERITE'
   )
   const [uploadProgress, setUploadProgress] = useState<number | null>(null)
@@ -56,7 +49,7 @@ const UploadPdf: NextPage = () => {
   
       console.log('pdf file is present');
       
-      const input: UploadPdfProps = {
+      const input: IBeneficiaryWithPdf = {
         year,
         month,
         cpf,
