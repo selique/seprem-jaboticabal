@@ -158,7 +158,7 @@ const UploadPdf: NextPage = () => {
 
     try {
       console.log('Starting upload')
-      const res = await fetch(`http://localhost:3001/?fileType=${fileType}`, {
+      const res = await fetch(`${process.env.NEXT_UPLOADS_URL}?fileType=${fileType}`, {
         method: 'POST',
         body: formData,
         // enable progress reporting
