@@ -20,11 +20,11 @@ type UploadLogItem = {
 type IBeneficiaryWithPdf = IBeneficiary &
   IBeneficiaryPdfFile & { fileType: 'HOLERITE' }
 
-type IDesmotrativoAnualWithPdf = IBeneficiaryWithPdf & {
+type IDemostrativoAnualWithPdf = IBeneficiaryWithPdf & {
   fileType: 'DEMOSTRATIVO_ANUAL'
 }
 
-type BeneficiaryPdfInput = IBeneficiaryWithPdf | IDesmotrativoAnualWithPdf
+type BeneficiaryPdfInput = IBeneficiaryWithPdf | IDemostrativoAnualWithPdf
 
 const UploadPdf: NextPage = () => {
   const [file, setFile] = useState<File | null>(null)
@@ -63,7 +63,7 @@ const UploadPdf: NextPage = () => {
 
       let uploadData:
         | IBeneficiaryWithPdf
-        | IDesmotrativoAnualWithPdf
+        | IDemostrativoAnualWithPdf
         | undefined
 
       if (fileType === 'HOLERITE') {
@@ -85,7 +85,7 @@ const UploadPdf: NextPage = () => {
           fileName: pdf.fileName,
           fileType,
           file: pdf.file,
-        } as IDesmotrativoAnualWithPdf
+        } as IDemostrativoAnualWithPdf
       } else {
         console.error('Invalid file type fe')
         return null
