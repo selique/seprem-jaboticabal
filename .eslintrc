@@ -1,7 +1,15 @@
 {
   "extends": [
+    "next", 
+    "prettier",
     "next/core-web-vitals",
     "eslint:recommended",
     "plugin:prettier/recommended"
-  ]
+  ],
+  "rules": {
+    "no-unused-vars": "off",
+    "no-undef": "off",
+    "no-useless-escape": "off",
+    "react/react-in-jsx-scope": "off"
+  }
 }
