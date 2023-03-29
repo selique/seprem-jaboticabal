@@ -5,11 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "format": "prettier --write .",
-    "precommit": "npm run format && npm run lint",
-    "postinstall": "prisma generate || true"
+    "start": "next start"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.0.0",
