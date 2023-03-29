@@ -5,7 +5,7 @@
 
 */
 -- CreateEnum
-CREATE TYPE "PdfFileType" AS ENUM ('HOLERITE', 'DESMOTRATIVO_ANUAL');
+CREATE TYPE "PdfFileType" AS ENUM ('HOLERITE', 'DEMOSTRATIVO_ANUAL');
 
 -- DropIndex
 DROP INDEX "BeneficiaryUser_enrollment_key";

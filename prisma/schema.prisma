@@ -28,7 +28,7 @@ model BeneficiaryPdfFile {
   fileType      PdfFileType
   file          String
   year          Int
-  month         Int
+  month         Int?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   beneficiary   BeneficiaryUser?    @relation(fields: [cpf], references: [cpf], onDelete: Cascade)
@@ -36,7 +36,7 @@ model BeneficiaryPdfFile {
 
 enum PdfFileType {
   HOLERITE
-  DESMOTRATIVO_ANUAL
+  DEMOSTRATIVO_ANUAL
 }
 
 model AdminUser {

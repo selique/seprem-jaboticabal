@@ -17,7 +17,11 @@ type UploadLogItem = {
   status: string | UploadStatus
 }
 
-type IBeneficiaryWithPdf = IBeneficiary & IBeneficiaryPdfFile
+type IBeneficiaryWithPdf = IBeneficiary & IBeneficiaryPdfFile & { fileType: 'HOLERITE' }
+
+type IDesmotrativoAnualWithPdf = IBeneficiaryWithPdf & { fileType: 'DEMOSTRATIVO_ANUAL' }
+
+type BeneficiaryPdfInput = IBeneficiaryWithPdf | IDesmotrativoAnualWithPdf
 
 const UploadPdf: NextPage = () => {
   const [file, setFile] = useState<File | null>(null)
@@ -43,73 +47,92 @@ const UploadPdf: NextPage = () => {
     pdf,
   }: any) => {
     try {
-      if (!pdf || !pdf.file) return
-
-      console.log('pdf file is present')
-
-      const input: IBeneficiaryWithPdf = {
-        year,
-        month,
-        cpf,
-        name,
-        enrollment: Number(enrollment),
-        fileName: pdf.fileName,
-        fileType: fileType,
-        file: pdf.file,
-      }
-
+      if (!pdf || !pdf.file) return;
+  
+      console.log('pdf file is present');
+  
       setUploadLog((prevLog) => [
         ...prevLog,
         { name: pdf.fileName, status: 'UPLOADING' },
-      ])
-
-      console.log('Uploading PDF')
-
-      const result = await uploadPdfMutation.mutateAsync(input)
-
-      const uploadLogItem = { name: pdf.fileName, status: '' }
-
-      switch (result.status) {
-        case 409:
-          uploadLogItem.status = 'DUPLICATE'
-          break
-        case 201:
-          uploadLogItem.status = 'SUCCESS'
-          break
-        default:
-          uploadLogItem.status = 'UNKNOWN'
+      ]);
+  
+      console.log('Uploading PDF');
+  
+      let uploadData: IBeneficiaryWithPdf | IDesmotrativoAnualWithPdf | undefined;
+  
+      if (fileType === 'HOLERITE') {
+        uploadData = {
+          year,
+          month,
+          cpf,
+          name,
+          enrollment: Number(enrollment),
+          fileName: pdf.fileName,
+          fileType,
+          file: pdf.file,
+        } as IBeneficiaryWithPdf;
+      } else if (fileType === 'DEMOSTRATIVO_ANUAL') {
+        uploadData = {
+          cpf,
+          name,
+          year,
+          fileName: pdf.fileName,
+          fileType,
+          file: pdf.file,
+        } as IDesmotrativoAnualWithPdf;
+      } else {
+        console.error('Invalid file type fe');
+        return null;
       }
-
-      setUploadLog((prevLog) => {
-        const newUploadLog = [...prevLog]
-        const index = newUploadLog.findIndex(
-          (item) => item.name === pdf.fileName
-        )
-        if (index !== -1) {
-          newUploadLog[index] = {
-            ...newUploadLog[index],
-            status: uploadLogItem.status,
-          }
-        } else {
-          newUploadLog.push(uploadLogItem)
+  
+      if (uploadData) {
+        const result = await uploadPdfMutation.mutateAsync(uploadData as BeneficiaryPdfInput);
+  
+        const uploadLogItem = { name: pdf.fileName, status: '' };
+  
+        switch (result.status) {
+          case 409:
+            uploadLogItem.status = 'DUPLICATE';
+            break;
+          case 201:
+            uploadLogItem.status = 'SUCCESS';
+            break;
+          default:
+            uploadLogItem.status = 'UNKNOWN';
         }
-        return newUploadLog
-      })
-
-      if (uploadLogItem.status === 'SUCCESS') {
-        console.log('PDF uploaded successfully:', result)
+  
+        setUploadLog((prevLog) => {
+          const newUploadLog = [...prevLog];
+          const index = newUploadLog.findIndex(
+            (item) => item.name === pdf.fileName
+          );
+          if (index !== -1) {
+            newUploadLog[index] = {
+              ...newUploadLog[index],
+              status: uploadLogItem.status,
+            };
+          } else {
+            newUploadLog.push(uploadLogItem);
+          }
+          return newUploadLog;
+        });
+  
+        if (uploadLogItem.status === 'SUCCESS') {
+          console.log('PDF uploaded successfully:', result);
+        }
       }
     } catch (error) {
-      console.error(`Error processing: ${error}`)
-
+      console.error(`Error processing: ${error}`);
+  
       if (pdf) {
         setUploadLog((prevLog) => [
           ...prevLog,
           { name: pdf.fileName, status: 'FAILED' },
-        ])
+        ]);
       }
     }
-  }
+  };
+  
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -128,12 +151,9 @@ const UploadPdf: NextPage = () => {
 
     try {
       console.log('Starting upload')
-      const res = await fetch('/api/upload-pdf', {
+      const res = await fetch(`http://localhost:3001/?fileType=${fileType}`, {
         method: 'POST',
         body: formData,
-        headers: {
-          fileTypeBeneficiary: fileType,
-        },
         // enable progress reporting
         onUploadProgress: (progressEvent: {
           loaded: number
