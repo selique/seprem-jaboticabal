@@ -1,6 +1,6 @@
 import * as z from 'zod'
 
-export const fileTypeSchema = z.enum(['HOLERITE', 'DESMOTRATIVO_ANUAL'])
+export const fileTypeSchema = z.enum(['HOLERITE', 'DEMOSTRATIVO_ANUAL'])
 
 export const beneficiaryPdfFileSchema = z.object({
   cpf: z.string(),
@@ -8,7 +8,7 @@ export const beneficiaryPdfFileSchema = z.object({
   fileType: fileTypeSchema,
   file: z.string(),
   year: z.number(),
-  month: z.number(),
+  month: z.string().optional().nullable(),
 })
 
 export const beneficiaryPdfFileSchemaArray = z.array(beneficiaryPdfFileSchema)

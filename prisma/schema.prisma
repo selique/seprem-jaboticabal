@@ -10,40 +10,40 @@ generator client {
 }
 
 model BeneficiaryUser {
-  id               String             @id @default(cuid())
-  cpf              String             @unique
+  id               String               @id @default(cuid())
+  cpf              String               @unique
   password         String
   name             String
   type_beneficiary String
-  enrollment       Int    
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  enrollment       Int
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
   pdfFiles         BeneficiaryPdfFile[]
 }
 
 model BeneficiaryPdfFile {
-  id            String  @id @default(cuid())
-  cpf           String
-  fileName      String
-  fileType      PdfFileType
-  file          String
-  year          Int
-  month         Int
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  beneficiary   BeneficiaryUser?    @relation(fields: [cpf], references: [cpf], onDelete: Cascade)
+  id          String           @id @default(cuid())
+  cpf         String
+  fileName    String
+  fileType    PdfFileType
+  file        String
+  year        Int
+  month       String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  beneficiary BeneficiaryUser? @relation(fields: [cpf], references: [cpf], onDelete: Cascade)
 }
 
 enum PdfFileType {
   HOLERITE
-  DESMOTRATIVO_ANUAL
+  DEMOSTRATIVO_ANUAL
 }
 
 model AdminUser {
-  id        String    @id @default(cuid())
-  email     String    @unique
+  id        String   @id @default(cuid())
+  email     String   @unique
   password  String
   name      String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

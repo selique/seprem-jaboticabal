@@ -17,7 +17,14 @@ type UploadLogItem = {
   status: string | UploadStatus
 }
 
-type IBeneficiaryWithPdf = IBeneficiary & IBeneficiaryPdfFile
+type IBeneficiaryWithPdf = IBeneficiary &
+  IBeneficiaryPdfFile & { fileType: 'HOLERITE' }
+
+type IDemostrativoAnualWithPdf = IBeneficiaryWithPdf & {
+  fileType: 'DEMOSTRATIVO_ANUAL'
+}
+
+type BeneficiaryPdfInput = IBeneficiaryWithPdf | IDemostrativoAnualWithPdf
 
 const UploadPdf: NextPage = () => {
   const [file, setFile] = useState<File | null>(null)
@@ -47,17 +54,6 @@ const UploadPdf: NextPage = () => {
 
       console.log('pdf file is present')
 
-      const input: IBeneficiaryWithPdf = {
-        year,
-        month,
-        cpf,
-        name,
-        enrollment: Number(enrollment),
-        fileName: pdf.fileName,
-        fileType: fileType,
-        file: pdf.file,
-      }
-
       setUploadLog((prevLog) => [
         ...prevLog,
         { name: pdf.fileName, status: 'UPLOADING' },
@@ -65,39 +61,73 @@ const UploadPdf: NextPage = () => {
 
       console.log('Uploading PDF')
 
-      const result = await uploadPdfMutation.mutateAsync(input)
+      let uploadData:
+        | IBeneficiaryWithPdf
+        | IDemostrativoAnualWithPdf
+        | undefined
 
-      const uploadLogItem = { name: pdf.fileName, status: '' }
-
-      switch (result.status) {
-        case 409:
-          uploadLogItem.status = 'DUPLICATE'
-          break
-        case 201:
-          uploadLogItem.status = 'SUCCESS'
-          break
-        default:
-          uploadLogItem.status = 'UNKNOWN'
+      if (fileType === 'HOLERITE') {
+        uploadData = {
+          year,
+          month,
+          cpf,
+          name,
+          enrollment: Number(enrollment),
+          fileName: pdf.fileName,
+          fileType,
+          file: pdf.file,
+        } as IBeneficiaryWithPdf
+      } else if (fileType === 'DEMOSTRATIVO_ANUAL') {
+        uploadData = {
+          cpf,
+          name,
+          year,
+          fileName: pdf.fileName,
+          fileType,
+          file: pdf.file,
+        } as IDemostrativoAnualWithPdf
+      } else {
+        console.error('Invalid file type fe')
+        return null
       }
 
-      setUploadLog((prevLog) => {
-        const newUploadLog = [...prevLog]
-        const index = newUploadLog.findIndex(
-          (item) => item.name === pdf.fileName
+      if (uploadData) {
+        const result = await uploadPdfMutation.mutateAsync(
+          uploadData as BeneficiaryPdfInput
         )
-        if (index !== -1) {
-          newUploadLog[index] = {
-            ...newUploadLog[index],
-            status: uploadLogItem.status,
-          }
-        } else {
-          newUploadLog.push(uploadLogItem)
-        }
-        return newUploadLog
-      })
 
-      if (uploadLogItem.status === 'SUCCESS') {
-        console.log('PDF uploaded successfully:', result)
+        const uploadLogItem = { name: pdf.fileName, status: '' }
+
+        switch (result.status) {
+          case 409:
+            uploadLogItem.status = 'DUPLICATE'
+            break
+          case 201:
+            uploadLogItem.status = 'SUCCESS'
+            break
+          default:
+            uploadLogItem.status = 'UNKNOWN'
+        }
+
+        setUploadLog((prevLog) => {
+          const newUploadLog = [...prevLog]
+          const index = newUploadLog.findIndex(
+            (item) => item.name === pdf.fileName
+          )
+          if (index !== -1) {
+            newUploadLog[index] = {
+              ...newUploadLog[index],
+              status: uploadLogItem.status,
+            }
+          } else {
+            newUploadLog.push(uploadLogItem)
+          }
+          return newUploadLog
+        })
+
+        if (uploadLogItem.status === 'SUCCESS') {
+          console.log('PDF uploaded successfully:', result)
+        }
       }
     } catch (error) {
       console.error(`Error processing: ${error}`)
@@ -128,23 +158,23 @@ const UploadPdf: NextPage = () => {
 
     try {
       console.log('Starting upload')
-      const res = await fetch('/api/upload-pdf', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          fileTypeBeneficiary: fileType,
-        },
-        // enable progress reporting
-        onUploadProgress: (progressEvent: {
-          loaded: number
-          total: number
-        }) => {
-          const progress = Math.round(
-            (progressEvent.loaded / progressEvent.total) * 100
-          )
-          setUploadProgress(progress)
-        },
-      } as any)
+      const res = await fetch(
+        `https://seprem-jaboticabal.cyclic.app?fileType=${fileType}`,
+        {
+          method: 'POST',
+          body: formData,
+          // enable progress reporting
+          onUploadProgress: (progressEvent: {
+            loaded: number
+            total: number
+          }) => {
+            const progress = Math.round(
+              (progressEvent.loaded / progressEvent.total) * 100
+            )
+            setUploadProgress(progress)
+          },
+        } as any
+      )
 
       console.log('Upload response', res)
       if (!res.ok) {

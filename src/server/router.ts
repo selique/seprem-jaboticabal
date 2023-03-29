@@ -6,8 +6,6 @@ import { beneficiaryPdfFileSchema } from '@common/validation/pdf'
 import { IContext } from '@server/context'
 import * as z from 'zod'
 
-type PdfFileType = 'HOLERITE' | 'DESMOTRATIVO_ANUAL'
-
 const t = initTRPC.context<IContext>().create()
 
 export const serverRouter = t.router({
@@ -111,46 +109,57 @@ export const serverRouter = t.router({
           result: fileName,
         }
       }
-
-      const beneficiaryExists = await ctx.prisma.beneficiaryUser.findFirst({
-        where: { cpf },
-      })
-
-      if (!beneficiaryExists) {
-        const enrollmentStr = enrollment.toString()
-        const hashedPassword = await hash(enrollmentStr)
-
-        const result = await ctx.prisma.beneficiaryUser.create({
-          data: {
-            cpf,
-            password: hashedPassword,
-            name,
-            type_beneficiary: 'BENEFICIARY',
-            enrollment,
-          },
+      // Create the user if it does not exist only if the file type is HOLERITE
+      // DECLARACAO_ANUAL not has field enrollment to map for creation of user
+      if (fileType === 'HOLERITE' && enrollment) {
+        const beneficiaryExists = await ctx.prisma.beneficiaryUser.findFirst({
+          where: { cpf },
         })
 
-        if (result) {
-          console.log('User created successfully')
-        } else {
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'An error occurred while creating the user',
+        if (!beneficiaryExists) {
+          const enrollmentStr = enrollment?.toString()
+          const hashedPassword = await hash(enrollmentStr)
+
+          const result = await ctx.prisma.beneficiaryUser.create({
+            data: {
+              cpf,
+              password: hashedPassword,
+              name,
+              type_beneficiary: 'BENEFICIARY',
+              enrollment,
+            },
           })
+
+          if (result) {
+            console.log('User created successfully')
+          } else {
+            throw new TRPCError({
+              code: 'INTERNAL_SERVER_ERROR',
+              message: 'An error occurred while creating the user',
+            })
+          }
         }
       }
-
       // Create the PDF file in the database
       const createFilePdfBeneficiary =
         await ctx.prisma.beneficiaryPdfFile.create({
-          data: {
-            cpf,
-            fileName,
-            fileType: fileType as PdfFileType,
-            year,
-            month,
-            file,
-          },
+          data:
+            fileType === 'HOLERITE'
+              ? {
+                  cpf,
+                  fileName,
+                  fileType,
+                  year,
+                  month: (month || null) as any,
+                  file,
+                }
+              : {
+                  cpf,
+                  fileName,
+                  fileType,
+                  year,
+                  file,
+                },
         })
 
       if (!createFilePdfBeneficiary) {
