@@ -158,20 +158,23 @@ const UploadPdf: NextPage = () => {
 
     try {
       console.log('Starting upload')
-      const res = await fetch(`${process.env.NEXT_UPLOADS_URL}?fileType=${fileType}`, {
-        method: 'POST',
-        body: formData,
-        // enable progress reporting
-        onUploadProgress: (progressEvent: {
-          loaded: number
-          total: number
-        }) => {
-          const progress = Math.round(
-            (progressEvent.loaded / progressEvent.total) * 100
-          )
-          setUploadProgress(progress)
-        },
-      } as any)
+      const res = await fetch(
+        `${process.env.NEXT_UPLOADS_URL}?fileType=${fileType}`,
+        {
+          method: 'POST',
+          body: formData,
+          // enable progress reporting
+          onUploadProgress: (progressEvent: {
+            loaded: number
+            total: number
+          }) => {
+            const progress = Math.round(
+              (progressEvent.loaded / progressEvent.total) * 100
+            )
+            setUploadProgress(progress)
+          },
+        } as any
+      )
 
       console.log('Upload response', res)
       if (!res.ok) {
