@@ -17,14 +17,14 @@ const Home: NextPage = () => {
   })
 
   const onSubmitSignIn = async (data: ILogin) => {
-      console.log(data)
-      try {
-        await signIn('credentials', { ...data, callbackUrl: '/dashboard' })
-        reset()
-      } catch (error) {
-        // handle unexpected error
-        console.error(error)
-      }
+    console.log(data)
+    try {
+      await signIn('credentials', { ...data, callbackUrl: '/dashboard' })
+      reset()
+    } catch (error) {
+      // handle unexpected error
+      console.error(error)
+    }
   }
 
   return (

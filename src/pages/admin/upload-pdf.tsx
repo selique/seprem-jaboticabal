@@ -17,14 +17,12 @@ type UploadLogItem = {
   status: string | UploadStatus
 }
 
-type IBeneficiaryWithPdf = IBeneficiary & IBeneficiaryPdfFile;
+type IBeneficiaryWithPdf = IBeneficiary & IBeneficiaryPdfFile
 
 const UploadPdf: NextPage = () => {
   const [file, setFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
-  const [fileType, setFileType] = useState<IFileType>(
-    'HOLERITE'
-  )
+  const [fileType, setFileType] = useState<IFileType>('HOLERITE')
   const [uploadProgress, setUploadProgress] = useState<number | null>(null)
   const [processedCount, setProcessedCount] = useState(0)
   const [processedCountTotal, setProcessedCountTotal] = useState(0)
@@ -45,10 +43,10 @@ const UploadPdf: NextPage = () => {
     pdf,
   }: any) => {
     try {
-      if (!pdf || !pdf.file) return;
-  
-      console.log('pdf file is present');
-      
+      if (!pdf || !pdf.file) return
+
+      console.log('pdf file is present')
+
       const input: IBeneficiaryWithPdf = {
         year,
         month,
@@ -58,55 +56,60 @@ const UploadPdf: NextPage = () => {
         fileName: pdf.fileName,
         fileType: fileType,
         file: pdf.file,
-      };
-  
+      }
+
       setUploadLog((prevLog) => [
         ...prevLog,
         { name: pdf.fileName, status: 'UPLOADING' },
-      ]);
-  
-      console.log('Uploading PDF');
-  
-      const result = await uploadPdfMutation.mutateAsync(input);
-  
-      const uploadLogItem = { name: pdf.fileName, status: '' };
-  
+      ])
+
+      console.log('Uploading PDF')
+
+      const result = await uploadPdfMutation.mutateAsync(input)
+
+      const uploadLogItem = { name: pdf.fileName, status: '' }
+
       switch (result.status) {
         case 409:
-          uploadLogItem.status = 'DUPLICATE';
-          break;
+          uploadLogItem.status = 'DUPLICATE'
+          break
         case 201:
-          uploadLogItem.status = 'SUCCESS';
-          break;
+          uploadLogItem.status = 'SUCCESS'
+          break
         default:
-          uploadLogItem.status = 'UNKNOWN';
+          uploadLogItem.status = 'UNKNOWN'
       }
-  
+
       setUploadLog((prevLog) => {
-        const newUploadLog = [...prevLog];
-        const index = newUploadLog.findIndex((item) => item.name === pdf.fileName);
+        const newUploadLog = [...prevLog]
+        const index = newUploadLog.findIndex(
+          (item) => item.name === pdf.fileName
+        )
         if (index !== -1) {
-          newUploadLog[index] = { ...newUploadLog[index], status: uploadLogItem.status };
+          newUploadLog[index] = {
+            ...newUploadLog[index],
+            status: uploadLogItem.status,
+          }
         } else {
-          newUploadLog.push(uploadLogItem);
+          newUploadLog.push(uploadLogItem)
         }
-        return newUploadLog;
-      });
-  
+        return newUploadLog
+      })
+
       if (uploadLogItem.status === 'SUCCESS') {
-        console.log('PDF uploaded successfully:', result);
+        console.log('PDF uploaded successfully:', result)
       }
     } catch (error) {
-      console.error(`Error processing: ${error}`);
-      
+      console.error(`Error processing: ${error}`)
+
       if (pdf) {
         setUploadLog((prevLog) => [
           ...prevLog,
           { name: pdf.fileName, status: 'FAILED' },
-        ]);
+        ])
       }
     }
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -203,9 +206,7 @@ const UploadPdf: NextPage = () => {
         </label>
         <select
           value={fileType}
-          onChange={(e) =>
-            setFileType(e.target.value as IFileType)
-          }
+          onChange={(e) => setFileType(e.target.value as IFileType)}
           className="block w-full px-4 py-2 text-base border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
         >
           <option value="HOLERITE">Holerite</option>
@@ -250,15 +251,28 @@ const UploadPdf: NextPage = () => {
           </div>
           <div className="flex items-center mr-4">
             <FaCheckCircle className="mr-2 text-green-500" />
-            <span>Success {uploadLog.filter((log) => log.status === 'SUCCESS').length}</span>
+            <span>
+              Success{' '}
+              {uploadLog.filter((log) => log.status === 'SUCCESS').length}
+            </span>
           </div>
           <div className="flex items-center mr-4">
             <FaExclamationTriangle className="mr-2 text-yellow-500" />
-            <span>Duplicate {uploadLog.filter((log) => log.status === 'DUPLICATE').length}</span>
+            <span>
+              Duplicate{' '}
+              {uploadLog.filter((log) => log.status === 'DUPLICATE').length}
+            </span>
           </div>
           <div className="flex items-center">
             <FaTimesCircle className="mr-2 text-red-500" />
-            <span>Failed/Unknown {uploadLog.filter((log) => log.status === 'FAILED' || log.status === 'UNKNOWN').length}</span>
+            <span>
+              Failed/Unknown{' '}
+              {
+                uploadLog.filter(
+                  (log) => log.status === 'FAILED' || log.status === 'UNKNOWN'
+                ).length
+              }
+            </span>
           </div>
         </div>
         {uploadProgress !== null && (
@@ -293,7 +307,7 @@ const UploadPdf: NextPage = () => {
             {[...uploadLog].reverse().map((item, index) => (
               <div
                 key={index}
-                className={`flex items-center py-2 ${ 
+                className={`flex items-center py-2 ${
                   item.status === 'UPLOADING'
                     ? 'bg-blue-300 text-blue-700'
                     : item.status === 'SUCCESS'
@@ -304,9 +318,9 @@ const UploadPdf: NextPage = () => {
                 }`}
                 style={{
                   backgroundColor:
-                  item.status === 'UPLOADING'
-                  ? 'bg-blue-300 text-blue-700'
-                  : item.status === 'SUCCESS'
+                    item.status === 'UPLOADING'
+                      ? 'bg-blue-300 text-blue-700'
+                      : item.status === 'SUCCESS'
                       ? '#C8E6C9'
                       : item.status === 'DUPLICATE'
                       ? '#FFF9C4'

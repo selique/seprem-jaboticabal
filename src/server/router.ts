@@ -6,7 +6,6 @@ import { beneficiaryPdfFileSchema } from '@common/validation/pdf'
 import { IContext } from '@server/context'
 import * as z from 'zod'
 
-
 type PdfFileType = 'HOLERITE' | 'DESMOTRATIVO_ANUAL'
 
 const t = initTRPC.context<IContext>().create()
@@ -77,7 +76,14 @@ export const serverRouter = t.router({
   //     }
   //   }),
   uploadPdf: t.procedure
-    .input(z.object({...beneficiaryPdfFileSchema.shape, ...beneficiarySchema.shape}).catchall(z.any()))
+    .input(
+      z
+        .object({
+          ...beneficiaryPdfFileSchema.shape,
+          ...beneficiarySchema.shape,
+        })
+        .catchall(z.any())
+    )
     .mutation(async ({ input, ctx }) => {
       const { cpf, name, enrollment, fileName, fileType, year, month, file } =
         input
@@ -105,7 +111,7 @@ export const serverRouter = t.router({
           result: fileName,
         }
       }
-      
+
       const beneficiaryExists = await ctx.prisma.beneficiaryUser.findFirst({
         where: { cpf },
       })
@@ -177,7 +183,6 @@ export const serverRouter = t.router({
       //     message: 'You are not authorized to perform this action',
       //   })
       // }
-      
 
       const pdfFiles = await ctx.prisma.beneficiaryPdfFile.findMany({
         where: { cpf },
@@ -207,20 +212,20 @@ export const serverRouter = t.router({
 
       const pdfFile = await ctx.prisma.beneficiaryPdfFile.findFirst({
         where: { fileName },
-      });
+      })
 
       if (!pdfFile) {
         return {
           status: 404,
           message: 'PDF file does not exist',
           result: false,
-        };
+        }
       } else {
         return {
           status: 409,
           message: 'PDF file exists',
           result: true,
-        };
+        }
       }
     }),
 })
