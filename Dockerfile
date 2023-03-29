@@ -1,22 +1,23 @@
-# Dockerfile
-
-# Use the official Node.js image as the base image
-FROM node:14
-
-# Set the working directory
-WORKDIR /app
-
-# Copy package.json and package-lock.json to the working directory
-COPY package*.json ./
-
-# Install dependencies
+FROM node:lts as dependencies
+WORKDIR /seprem-jaboticabal 
+COPY package.json package-lock.json ./
 RUN npm ci
 
-# Copy the application source code
+FROM node:lts as builder
+WORKDIR /seprem-jaboticabal
 COPY . .
+COPY --from=dependencies /seprem-jaboticabal/node_modules ./node_modules
+RUN npm run build
 
-# Expose the application's port
+FROM node:lts as runner
+WORKDIR /seprem-jaboticabal
+ENV NODE_ENV production
+# If you are using a custom next.config.js file, uncomment this line.
+COPY --from=builder /seprem-jaboticabal/next.config.js ./
+COPY --from=builder /seprem-jaboticabal/public ./public
+COPY --from=builder /seprem-jaboticabal/.next ./.next
+COPY --from=builder /seprem-jaboticabal/node_modules ./node_modules
+COPY --from=builder /seprem-jaboticabal/package.json ./package.json
+
 EXPOSE 3000
-
-# Start the application
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "start"]
