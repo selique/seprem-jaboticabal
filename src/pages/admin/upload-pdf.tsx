@@ -159,7 +159,7 @@ const UploadPdf: NextPage = () => {
     try {
       console.log('Starting upload')
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_UPLOAD_URL}?fileType=${fileType}`,
+        `https://seprem-jaboticabal.cyclic.app?fileType=${fileType}`,
         {
           method: 'POST',
           body: formData,
