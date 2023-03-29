@@ -69,7 +69,7 @@ const UploadPdf: NextPage = () => {
       if (fileType === 'HOLERITE') {
         uploadData = {
           year,
-          month,
+          month: month.toString().padStart(2, '0'),
           cpf,
           name,
           enrollment: Number(enrollment),
