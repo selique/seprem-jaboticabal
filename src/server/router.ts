@@ -109,7 +109,7 @@ export const serverRouter = t.router({
           result: fileName,
         }
       }
-      // Create the user if it does not exist only if the file type is HOLERITE 
+      // Create the user if it does not exist only if the file type is HOLERITE
       // DECLARACAO_ANUAL not has field enrollment to map for creation of user
       if (fileType === 'HOLERITE' && enrollment) {
         const beneficiaryExists = await ctx.prisma.beneficiaryUser.findFirst({
@@ -129,7 +129,6 @@ export const serverRouter = t.router({
               enrollment,
             },
           })
-          
 
           if (result) {
             console.log('User created successfully')
@@ -142,26 +141,27 @@ export const serverRouter = t.router({
         }
       }
       // Create the PDF file in the database
-      const createFilePdfBeneficiary = await ctx.prisma.beneficiaryPdfFile.create({
-        data:
-          fileType === 'HOLERITE'
-            ? {
-                cpf,
-                fileName,
-                fileType,
-                year,
-                month,
-                file,
-              }
-            : {
-                cpf,
-                fileName,
-                fileType: 'DEMOSTRATIVO_ANUAL',
-                year,
-                file,
-              },
-      });
-      
+      const createFilePdfBeneficiary =
+        await ctx.prisma.beneficiaryPdfFile.create({
+          data:
+            fileType === 'HOLERITE'
+              ? {
+                  cpf,
+                  fileName,
+                  fileType,
+                  year,
+                  month,
+                  file,
+                }
+              : {
+                  cpf,
+                  fileName,
+                  fileType: 'DEMOSTRATIVO_ANUAL',
+                  year,
+                  file,
+                },
+        })
+
       if (!createFilePdfBeneficiary) {
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',

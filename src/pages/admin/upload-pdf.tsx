@@ -17,9 +17,12 @@ type UploadLogItem = {
   status: string | UploadStatus
 }
 
-type IBeneficiaryWithPdf = IBeneficiary & IBeneficiaryPdfFile & { fileType: 'HOLERITE' }
+type IBeneficiaryWithPdf = IBeneficiary &
+  IBeneficiaryPdfFile & { fileType: 'HOLERITE' }
 
-type IDesmotrativoAnualWithPdf = IBeneficiaryWithPdf & { fileType: 'DEMOSTRATIVO_ANUAL' }
+type IDesmotrativoAnualWithPdf = IBeneficiaryWithPdf & {
+  fileType: 'DEMOSTRATIVO_ANUAL'
+}
 
 type BeneficiaryPdfInput = IBeneficiaryWithPdf | IDesmotrativoAnualWithPdf
 
@@ -47,19 +50,22 @@ const UploadPdf: NextPage = () => {
     pdf,
   }: any) => {
     try {
-      if (!pdf || !pdf.file) return;
-  
-      console.log('pdf file is present');
-  
+      if (!pdf || !pdf.file) return
+
+      console.log('pdf file is present')
+
       setUploadLog((prevLog) => [
         ...prevLog,
         { name: pdf.fileName, status: 'UPLOADING' },
-      ]);
-  
-      console.log('Uploading PDF');
-  
-      let uploadData: IBeneficiaryWithPdf | IDesmotrativoAnualWithPdf | undefined;
-  
+      ])
+
+      console.log('Uploading PDF')
+
+      let uploadData:
+        | IBeneficiaryWithPdf
+        | IDesmotrativoAnualWithPdf
+        | undefined
+
       if (fileType === 'HOLERITE') {
         uploadData = {
           year,
@@ -70,7 +76,7 @@ const UploadPdf: NextPage = () => {
           fileName: pdf.fileName,
           fileType,
           file: pdf.file,
-        } as IBeneficiaryWithPdf;
+        } as IBeneficiaryWithPdf
       } else if (fileType === 'DEMOSTRATIVO_ANUAL') {
         uploadData = {
           cpf,
@@ -79,60 +85,61 @@ const UploadPdf: NextPage = () => {
           fileName: pdf.fileName,
           fileType,
           file: pdf.file,
-        } as IDesmotrativoAnualWithPdf;
+        } as IDesmotrativoAnualWithPdf
       } else {
-        console.error('Invalid file type fe');
-        return null;
+        console.error('Invalid file type fe')
+        return null
       }
-  
+
       if (uploadData) {
-        const result = await uploadPdfMutation.mutateAsync(uploadData as BeneficiaryPdfInput);
-  
-        const uploadLogItem = { name: pdf.fileName, status: '' };
-  
+        const result = await uploadPdfMutation.mutateAsync(
+          uploadData as BeneficiaryPdfInput
+        )
+
+        const uploadLogItem = { name: pdf.fileName, status: '' }
+
         switch (result.status) {
           case 409:
-            uploadLogItem.status = 'DUPLICATE';
-            break;
+            uploadLogItem.status = 'DUPLICATE'
+            break
           case 201:
-            uploadLogItem.status = 'SUCCESS';
-            break;
+            uploadLogItem.status = 'SUCCESS'
+            break
           default:
-            uploadLogItem.status = 'UNKNOWN';
+            uploadLogItem.status = 'UNKNOWN'
         }
-  
+
         setUploadLog((prevLog) => {
-          const newUploadLog = [...prevLog];
+          const newUploadLog = [...prevLog]
           const index = newUploadLog.findIndex(
             (item) => item.name === pdf.fileName
-          );
+          )
           if (index !== -1) {
             newUploadLog[index] = {
               ...newUploadLog[index],
               status: uploadLogItem.status,
-            };
+            }
           } else {
-            newUploadLog.push(uploadLogItem);
+            newUploadLog.push(uploadLogItem)
           }
-          return newUploadLog;
-        });
-  
+          return newUploadLog
+        })
+
         if (uploadLogItem.status === 'SUCCESS') {
-          console.log('PDF uploaded successfully:', result);
+          console.log('PDF uploaded successfully:', result)
         }
       }
     } catch (error) {
-      console.error(`Error processing: ${error}`);
-  
+      console.error(`Error processing: ${error}`)
+
       if (pdf) {
         setUploadLog((prevLog) => [
           ...prevLog,
           { name: pdf.fileName, status: 'FAILED' },
-        ]);
+        ])
       }
     }
-  };
-  
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
