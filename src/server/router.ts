@@ -156,7 +156,7 @@ export const serverRouter = t.router({
               : {
                   cpf,
                   fileName,
-                  fileType: 'DEMOSTRATIVO_ANUAL',
+                  fileType,
                   year,
                   file,
                 },
