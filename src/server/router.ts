@@ -150,7 +150,7 @@ export const serverRouter = t.router({
                   fileName,
                   fileType,
                   year,
-                  month: month || null as any,
+                  month: (month || null) as any,
                   file,
                 }
               : {
