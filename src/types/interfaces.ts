@@ -3,7 +3,7 @@ export interface PdfUploadInput {
   fileName: string
   fileType: 'HOLERITE' | 'DEMOSTRATIVO_ANUAL'
   year: number
-  month: number
+  month: number | null
   file?: File
 }
 
@@ -12,7 +12,7 @@ export interface UploadResult {
   name: string
   enrollment: number
   year: number
-  month: number
+  month: number | null
   pdf: {
     fileName: string
     fileType: string
