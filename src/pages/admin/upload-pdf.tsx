@@ -7,7 +7,7 @@ import {
   FaCheckCircle,
   FaExclamationTriangle,
   FaSpinner,
-  FaTimesCircle,
+  FaTimesCircle
 } from 'react-icons/fa'
 
 type UploadStatus = 'UPLOADING' | 'DUPLICATE' | 'SUCCESS' | 'FAILED' | 'UNKNOWN'
@@ -159,7 +159,7 @@ const UploadPdf: NextPage = () => {
     try {
       console.log('Starting upload')
       const res = await fetch(
-        `https://seprem-jaboticabal-be.onrender.com?fileType=${fileType}`,
+        `https://qslpnbrusas4y3fpj435lvag540yhzdx.lambda-url.sa-east-1.on.aws/?fileType=${fileType}`,
         {
           method: 'POST',
           body: formData,
@@ -183,6 +183,7 @@ const UploadPdf: NextPage = () => {
 
       const text = await res.text()
       const parsedResults = JSON.parse(text)
+      console.log('Upload results', parsedResults)
       if (!Array.isArray(parsedResults)) {
         throw new Error(
           'Invalid response format. The response is not an array:'

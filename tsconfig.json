@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -16,29 +20,67 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@components/*": ["./src/components/*"],
-      "@atoms/*": ["./src/components/atoms/*"],
-      "@molecules/*": ["./src/components/molecules/*"],
-      "@organisms/*": ["./src/components/organisms/*"],
-      "@templates/*": ["./src/components/templates/*"],
-      "@pages/*": ["./src/components/pages/*"],
-      "@styles/*": ["./src/styles/*"],
-      "@utils/*": ["./src/utils/*"],
-      "@hooks/*": ["./src/hooks/*"],
-      "@assets/*": ["./src/assets/*"],
-      "@common/*": ["src/common/*"],
-      "@types": ["./src/types/index.ts"],
-      "@server/*": ["./src/server/*"],
-      "@libs/*": ["./src/libs/*"]
-    }
+      "@/*": [
+        "./src/*"
+      ],
+      "@components/*": [
+        "./src/components/*"
+      ],
+      "@atoms/*": [
+        "./src/components/atoms/*"
+      ],
+      "@molecules/*": [
+        "./src/components/molecules/*"
+      ],
+      "@organisms/*": [
+        "./src/components/organisms/*"
+      ],
+      "@templates/*": [
+        "./src/components/templates/*"
+      ],
+      "@pages/*": [
+        "./src/components/pages/*"
+      ],
+      "@styles/*": [
+        "./src/styles/*"
+      ],
+      "@utils/*": [
+        "./src/utils/*"
+      ],
+      "@hooks/*": [
+        "./src/hooks/*"
+      ],
+      "@assets/*": [
+        "./src/assets/*"
+      ],
+      "@common/*": [
+        "src/common/*"
+      ],
+      "@types": [
+        "./src/types/index.ts"
+      ],
+      "@server/*": [
+        "./src/server/*"
+      ],
+      "@libs/*": [
+        "./src/libs/*"
+      ]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     "src/pages/api/auth/[...nextauth.].ts",
-    "prisma/seed.js"
+    "prisma/seed.js",
+    ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }

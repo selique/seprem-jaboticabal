@@ -10,5 +10,7 @@
       "username": "postgres",
       "password": "HZXjM^HYtKn!TrsN^N8dZWVy9bSf"
     }
-  ]
+  ],
+  "typescript.tsdk": "node_modules\\typescript\\lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true
 }
