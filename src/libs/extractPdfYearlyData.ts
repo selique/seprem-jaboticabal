@@ -44,7 +44,7 @@ const extractPdfYearlyData = async (
     cpf: extractCpf(page),
     name: extractName(page),
     year_current: extractYearCurrent(page),
-    year_calendar: extractYearCalendar(page),
+    year_calendar: extractYearCalendar(page)
   })
 
   return extractedData

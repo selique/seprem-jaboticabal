@@ -11,9 +11,9 @@ const Home: NextPage = () => {
   const { register, handleSubmit, reset } = useForm<ILogin>({
     defaultValues: {
       cpf: '',
-      password: '',
+      password: ''
     },
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(loginSchema)
   })
 
   const onSubmitSignIn = async (data: ILogin) => {

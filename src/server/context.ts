@@ -13,7 +13,7 @@ export const createContext = async (ctx: trpcNext.CreateNextContextOptions) => {
     req,
     res,
     session,
-    prisma,
+    prisma
   }
 }
 

@@ -47,7 +47,7 @@ const UploadPdf: NextPage = () => {
     enrollment,
     year,
     month,
-    pdf,
+    pdf
   }: any) => {
     try {
       if (!pdf || !pdf.file) return
@@ -56,7 +56,7 @@ const UploadPdf: NextPage = () => {
 
       setUploadLog((prevLog) => [
         ...prevLog,
-        { name: pdf.fileName, status: 'UPLOADING' },
+        { name: pdf.fileName, status: 'UPLOADING' }
       ])
 
       console.log('Uploading PDF')
@@ -75,7 +75,7 @@ const UploadPdf: NextPage = () => {
           enrollment: Number(enrollment),
           fileName: pdf.fileName,
           fileType,
-          file: pdf.file,
+          file: pdf.file
         } as IBeneficiaryWithPdf
       } else if (fileType === 'DEMOSTRATIVO_ANUAL') {
         uploadData = {
@@ -84,7 +84,7 @@ const UploadPdf: NextPage = () => {
           year,
           fileName: pdf.fileName,
           fileType,
-          file: pdf.file,
+          file: pdf.file
         } as IDemostrativoAnualWithPdf
       } else {
         console.error('Invalid file type fe')
@@ -117,7 +117,7 @@ const UploadPdf: NextPage = () => {
           if (index !== -1) {
             newUploadLog[index] = {
               ...newUploadLog[index],
-              status: uploadLogItem.status,
+              status: uploadLogItem.status
             }
           } else {
             newUploadLog.push(uploadLogItem)
@@ -135,7 +135,7 @@ const UploadPdf: NextPage = () => {
       if (pdf) {
         setUploadLog((prevLog) => [
           ...prevLog,
-          { name: pdf.fileName, status: 'FAILED' },
+          { name: pdf.fileName, status: 'FAILED' }
         ])
       }
     }
@@ -172,7 +172,7 @@ const UploadPdf: NextPage = () => {
               (progressEvent.loaded / progressEvent.total) * 100
             )
             setUploadProgress(progress)
-          },
+          }
         } as any
       )
 
@@ -324,7 +324,7 @@ const UploadPdf: NextPage = () => {
               <div
                 className="absolute top-0 left-0 h-full bg-green-500 rounded-full"
                 style={{
-                  width: `${(processedCount / processedCountTotal) * 100}%`,
+                  width: `${(processedCount / processedCountTotal) * 100}%`
                 }}
               />
             </div>
@@ -356,7 +356,7 @@ const UploadPdf: NextPage = () => {
                       : item.status === 'DUPLICATE'
                       ? '#FFF9C4'
                       : '#FFCDD2',
-                  borderRadius: '4px',
+                  borderRadius: '4px'
                 }}
               >
                 <div className="flex items-center w-full mx-2">

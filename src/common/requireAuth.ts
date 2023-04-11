@@ -11,8 +11,8 @@ export const requireAuth =
       return {
         redirect: {
           destination: '/', // login path
-          permanent: false,
-        },
+          permanent: false
+        }
       }
     }
 

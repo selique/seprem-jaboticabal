@@ -65,7 +65,7 @@ const extractMonth = (item: string): number | null => {
     'setembro',
     'outubro',
     'novembro',
-    'dezembro',
+    'dezembro'
   ]
 
   const regex = /Mensal([A-Za-z]+) de (\d{4})|(\w+)\s+de\s+(\d{4})Mensal/i
@@ -105,7 +105,7 @@ const extractPdfData = async (
     name: extractName(page),
     enrollment: extractEnrollment(page),
     month: extractMonth(page),
-    year: extractYear(page),
+    year: extractYear(page)
   })
 
   return extractedData

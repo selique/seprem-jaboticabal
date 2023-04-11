@@ -15,9 +15,9 @@ const SignUp: NextPage = () => {
   const { handleSubmit, register, reset } = useForm<ISignUp>({
     defaultValues: {
       cpf: '',
-      password: '',
+      password: ''
     },
-    resolver: zodResolver(signUpSchema),
+    resolver: zodResolver(signUpSchema)
   })
 
   // const { mutateAsync } = trpc.signup.useMutation()

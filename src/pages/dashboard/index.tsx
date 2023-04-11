@@ -13,7 +13,7 @@ const Dashboard: NextPage<Props> = () => {
   const {
     data: result,
     isLoading,
-    isError,
+    isError
   } = trpc.getBeneficiaryPdfFiles.useQuery({ cpf: session?.user?.cpf || '' })
 
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null)

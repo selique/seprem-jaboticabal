@@ -25,10 +25,10 @@ export const trpc = createTRPCNext<IServerRouter>({
     return {
       links: [
         httpBatchLink({
-          url: `${getBaseUrl()}/api/trpc`,
-        }),
-      ],
+          url: `${getBaseUrl()}/api/trpc`
+        })
+      ]
     }
   },
-  ssr: false,
+  ssr: false
 })

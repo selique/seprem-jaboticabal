@@ -78,7 +78,7 @@ export const serverRouter = t.router({
       z
         .object({
           ...beneficiaryPdfFileSchema.shape,
-          ...beneficiarySchema.shape,
+          ...beneficiarySchema.shape
         })
         .catchall(z.any())
     )
@@ -99,21 +99,21 @@ export const serverRouter = t.router({
 
       // Check if the file name already exists in the database
       const fileExists = await ctx.prisma.beneficiaryPdfFile.findFirst({
-        where: { fileName },
+        where: { fileName }
       })
 
       if (fileExists) {
         return {
           status: 409,
           message: 'File already exists.',
-          result: fileName,
+          result: fileName
         }
       }
       // Create the user if it does not exist only if the file type is HOLERITE
       // DECLARACAO_ANUAL not has field enrollment to map for creation of user
       if (fileType === 'HOLERITE' && enrollment) {
         const beneficiaryExists = await ctx.prisma.beneficiaryUser.findFirst({
-          where: { cpf },
+          where: { cpf }
         })
 
         if (!beneficiaryExists) {
@@ -126,8 +126,8 @@ export const serverRouter = t.router({
               password: hashedPassword,
               name,
               type_beneficiary: 'BENEFICIARY',
-              enrollment,
-            },
+              enrollment
+            }
           })
 
           if (result) {
@@ -135,7 +135,7 @@ export const serverRouter = t.router({
           } else {
             throw new TRPCError({
               code: 'INTERNAL_SERVER_ERROR',
-              message: 'An error occurred while creating the user',
+              message: 'An error occurred while creating the user'
             })
           }
         }
@@ -151,21 +151,21 @@ export const serverRouter = t.router({
                   fileType,
                   year,
                   month: (month || null) as any,
-                  file,
+                  file
                 }
               : {
                   cpf,
                   fileName,
                   fileType,
                   year,
-                  file,
-                },
+                  file
+                }
         })
 
       if (!createFilePdfBeneficiary) {
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'An error occurred while creating the PDF file',
+          message: 'An error occurred while creating the PDF file'
         })
       } else {
         console.log('PDF file created successfully')
@@ -173,7 +173,7 @@ export const serverRouter = t.router({
         return {
           status: 201,
           message: 'PDF file uploaded successfully',
-          result: fileName,
+          result: fileName
         }
       }
     }),
@@ -194,13 +194,13 @@ export const serverRouter = t.router({
       // }
 
       const pdfFiles = await ctx.prisma.beneficiaryPdfFile.findMany({
-        where: { cpf },
+        where: { cpf }
       })
 
       return {
         status: 200,
         message: 'User found successfully',
-        result: pdfFiles,
+        result: pdfFiles
       }
     }),
   checkExistingPdfFile: t.procedure
@@ -220,23 +220,23 @@ export const serverRouter = t.router({
       // }
 
       const pdfFile = await ctx.prisma.beneficiaryPdfFile.findFirst({
-        where: { fileName },
+        where: { fileName }
       })
 
       if (!pdfFile) {
         return {
           status: 404,
           message: 'PDF file does not exist',
-          result: false,
+          result: false
         }
       } else {
         return {
           status: 409,
           message: 'PDF file exists',
-          result: true,
+          result: true
         }
       }
-    }),
+    })
 })
 
 export type IServerRouter = typeof serverRouter
