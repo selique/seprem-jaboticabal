@@ -11,9 +11,9 @@ export const Layout: React.FC<LayoutProps> = ({ headline, desc, ...props }) => {
   const { data: session } = useSession()
 
   return (
-    <div className="min-h-screen bg-base-200 flex flex-col">
+    <div className="min-h-screen bg-base-200 flex flex-col" {...props}>
       <header className="navbar my-4 bg-red-300">
-        <section className="navbar-section flex items-center justify-between w-full">
+        <section className="navbar-section flex items-center justify-between mx-10">
           <a href="#" className="navbar-brand mr-2">
             <Image
               src="/seprem-logo.png"
@@ -32,8 +32,10 @@ export const Layout: React.FC<LayoutProps> = ({ headline, desc, ...props }) => {
         </section>
       </header>
 
-      <p className="text-2xl font-bold">{desc}</p>
-      <div className="flex-grow">{props.children}</div>
+      <div className="flex-grow mx-10">
+        <p className="text-2xl font-bold">{desc}</p>
+        {props.children}
+      </div>
     </div>
   )
 }

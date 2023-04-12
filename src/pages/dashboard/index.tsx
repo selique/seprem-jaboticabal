@@ -16,7 +16,7 @@ const Dashboard: NextPage<Props> = () => {
     isError
   } = trpc.getBeneficiaryPdfFiles.useQuery({ cpf: session?.user?.cpf || '' })
 
-  const [selectedMonth, setSelectedMonth] = useState<string | null>(null)
+  const [selectedYear, setSelectedYear] = useState<string | null>(null)
 
   const holeritesByYearAndMonth: Record<
     string,
@@ -45,10 +45,10 @@ const Dashboard: NextPage<Props> = () => {
     }
   }
 
-  const years = Object.keys(holeritesByYearAndMonth).sort().reverse()
+  const month = Object.keys(holeritesByYearAndMonth).sort().reverse()
 
   return (
-    <Layout headline="HOLERITES" desc="CLIQUE NO MÊS PARA ABRIR">
+    <Layout headline="HOLERITES" desc="CLIQUE NO MÊS PARA BAIXAR">
       {isLoading && (
         <p className="my-4 text-center leading-loose">Loading...</p>
       )}
@@ -59,49 +59,37 @@ const Dashboard: NextPage<Props> = () => {
       )}
       {!isLoading && !isError && (
         <>
-          {years.map((year) => (
-            <div key={year} className="my-4">
-              <h3 className="text-lg font-bold">{year}</h3>
+          {/* <code>{JSON.stringify(holeritesByYearAndMonth, null, 2)}</code> */}
+          {month.map((month) => (
+            <div key={month} className="my-4">
+              <h3 className="text-lg font-bold">{month}</h3>
               <div className="grid grid-cols-4 gap-2">
-                {Object.entries(holeritesByYearAndMonth[year])
+                {Object.entries(holeritesByYearAndMonth[month])
                   .sort(
                     ([a], [b]) => new Date(b).getTime() - new Date(a).getTime()
                   )
                   .map(([month, items]) => {
-                    const isSelected = month === selectedMonth
-                    const hasDownload = items.length > 0
                     return (
                       <div
                         key={month}
-                        className={`bg-gray-200 rounded-md p-2 cursor-pointer ${
-                          hasDownload ? 'hover:bg-gray-300' : ''
-                        } ${isSelected ? 'bg-red-600 text-white' : ''}`}
-                        onClick={() =>
-                          hasDownload &&
-                          setSelectedMonth(isSelected ? null : month)
-                        }
+                        className={`bg-gray-200 rounded-md p-2 cursor-pointer `}
                       >
                         {month}
+                        {items.map((item) => (
+                          <a
+                            key={item.id}
+                            href={`data:application/pdf;base64,${item.file}`}
+                            download={item.fileName}
+                            rel="noreferrer"
+                            className="block text-sm text-blue-500"
+                          >
+                            {item.fileName}
+                          </a>
+                        ))}
                       </div>
                     )
                   })}
               </div>
-              {selectedMonth && (
-                <div className="my-4">
-                  {holeritesByYearAndMonth[years[0]][selectedMonth].map(
-                    (item) => (
-                      <a
-                        key={item.id}
-                        href={`data:application/pdf;base64,${item.file}`}
-                        download={item.fileName}
-                        className="block my-2 p-2 rounded-lg bg-white hover:bg-gray-200"
-                      >
-                        {item.month}
-                      </a>
-                    )
-                  )}
-                </div>
-              )}
             </div>
           ))}
         </>
