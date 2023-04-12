@@ -159,7 +159,7 @@ const UploadPdf: NextPage = () => {
     try {
       console.log('Starting upload')
       const res = await fetch(
-        `https://qslpnbrusas4y3fpj435lvag540yhzdx.lambda-url.sa-east-1.on.aws/?fileType=${fileType}`,
+        `https://seprem-back-end.fly.dev/?fileType=${fileType}`,
         {
           method: 'POST',
           body: formData,
