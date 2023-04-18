@@ -24,10 +24,8 @@ const EsqueciMinhaSenha: NextPage = () => {
   })
 
   const onSubmitForgotPassword = async (data: IEsqueciMinhaSenha) => {
-    console.log(data)
     try {
-      const response = await forgotPasswordMutation.mutateAsync(data)
-      console.log(response)
+      await forgotPasswordMutation.mutateAsync(data)
       toast.success('Senha resetada com sucesso!', {
         position: 'top-center',
         autoClose: 5000,

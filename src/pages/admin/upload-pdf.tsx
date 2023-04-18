@@ -61,8 +61,6 @@ const UploadPdf: NextPage = () => {
         { name: pdf.fileName, status: 'UPLOADING' }
       ])
 
-      console.log('Uploading PDF')
-
       let uploadData:
         | IBeneficiaryWithPdf
         | IDemostrativoAnualWithPdf
@@ -101,7 +99,7 @@ const UploadPdf: NextPage = () => {
         )
 
         const uploadLogItem = { name: pdf.fileName, status: 'UNKNOWN' }
-        console.log('Upload result', result)
+
         if (result) {
           switch (result.status) {
             case 409:
@@ -135,8 +133,6 @@ const UploadPdf: NextPage = () => {
           }
           return newUploadLog
         })
-
-        console.log(`PDF ${uploadLogItem.status} :`, result)
       }
     } catch (error) {
       console.error(`Error processing: ${error}`)
@@ -172,7 +168,6 @@ const UploadPdf: NextPage = () => {
     formData.append('pdf', file)
 
     try {
-      console.log('Starting upload')
       const res = await fetch(
         `https://sepremjaboticabalback-end-production.up.railway.app/?fileType=${fileType}`,
         {
@@ -191,21 +186,18 @@ const UploadPdf: NextPage = () => {
         } as any
       )
 
-      console.log('Upload response', res)
       if (!res.ok) {
         throw new Error(`Error uploading file: ${res.status}`)
       }
 
       const text = await res.text()
       const parsedResults = JSON.parse(text)
-      console.log('Upload results', parsedResults)
       if (!Array.isArray(parsedResults)) {
         throw new Error(
           'Invalid response format. The response is not an array:'
         )
       }
 
-      console.log('Parsing results')
       setProcessedCount(0) // reset the processed count
       setProcessedCountTotal(parsedResults.length) // set the total count
       setUploadLog([]) // reset the upload log
@@ -221,7 +213,6 @@ const UploadPdf: NextPage = () => {
     } catch (error) {
       console.log(error)
     } finally {
-      console.log('Upload complete')
       setIsUploading(false)
     }
   }

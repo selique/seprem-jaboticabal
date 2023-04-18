@@ -77,11 +77,10 @@ export const serverRouter = t.router({
         })
 
         if (createFilePDF) {
-          console.log(
-            `PDF file ${overwrite ? 'updated' : 'created'} successfully`
-          )
+          // console.log(
+          //   `PDF file ${overwrite ? 'updated' : 'created'} successfully`
+          // )
           const typeResult = overwrite ? 200 : 201
-          console.log(typeResult)
           return {
             status: typeResult,
             message: `PDF file ${overwrite ? 'updated' : 'created'}`,

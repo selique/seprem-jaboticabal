@@ -7,7 +7,8 @@ import { signIn } from 'next-auth/react'
 import Head from 'next/head'
 import Image from 'next/image'
 import { useForm } from 'react-hook-form'
-
+import { toast, ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.min.css'
 const Home: NextPage = () => {
   const { register, handleSubmit, reset } = useForm<ILogin>({
     defaultValues: {
@@ -18,13 +19,21 @@ const Home: NextPage = () => {
   })
 
   const onSubmitSignIn = async (data: ILogin) => {
-    console.log(data)
     try {
       await signIn('credentials', { ...data, callbackUrl: '/dashboard' })
       reset()
     } catch (error) {
       // handle unexpected error
-      console.error(error)
+      toast.error('Erro ao tentar fazer login!', {
+        position: 'top-center',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'colored'
+      })
     }
   }
 
@@ -37,6 +46,7 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex flex-col items-center justify-start h-screen w-full">
+        <ToastContainer />
         <Image
           src="/seprem-logo.png"
           alt="Logo SEPREM"
