@@ -8,7 +8,8 @@ export const beneficiaryPdfFileSchema = z.object({
   fileType: fileTypeSchema,
   file: z.string(),
   year: z.number(),
-  month: z.string().optional().nullable()
+  month: z.string().optional().nullable(),
+  overwrite: z.boolean()
 })
 
 export const beneficiaryPdfFileSchemaArray = z.array(beneficiaryPdfFileSchema)

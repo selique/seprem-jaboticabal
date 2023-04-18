@@ -3,7 +3,7 @@ import { hash } from 'argon2'
 
 import { forgetPasswordSchema } from '@/common/validation/auth'
 import { beneficiarySchema } from '@common/validation/beneficiary'
-import { beneficiaryPdfFileSchema } from '@common/validation/pdf'
+import { beneficiaryPdfFileSchema, IFileType } from '@common/validation/pdf'
 import { IContext } from '@server/context'
 import * as z from 'zod'
 
@@ -20,23 +20,20 @@ export const serverRouter = t.router({
         .catchall(z.any())
     )
     .mutation(async ({ input, ctx }) => {
-      const { cpf, name, enrollment, fileName, fileType, year, month, file } =
-        input
+      const {
+        cpf,
+        name,
+        enrollment,
+        fileName,
+        fileType,
+        year,
+        month,
+        file,
+        overwrite
+      } = input
 
-      // Check if the file name already exists in the database
-      const fileExists = await ctx.prisma.beneficiaryPdfFile.findFirst({
-        where: { fileName }
-      })
-
-      if (fileExists) {
-        return {
-          status: 409,
-          message: 'File already exists.',
-          result: fileName
-        }
-      }
       // Create the user if it does not exist only if the file type is HOLERITE
-      // DECLARACAO_ANUAL not has field enrollment to map for creation of user
+      // DEMOSTRATIVO_ANUAL not has field enrollment to map for creation of user
       if (fileType === 'HOLERITE' && enrollment) {
         const beneficiaryExists = await ctx.prisma.beneficiaryUser.findFirst({
           where: { cpf }
@@ -65,41 +62,66 @@ export const serverRouter = t.router({
           }
         }
       }
+
       // Create the PDF file in the database
-      const createFilePdfBeneficiary =
-        await ctx.prisma.beneficiaryPdfFile.create({
-          data:
-            fileType === 'HOLERITE'
-              ? {
-                  cpf,
-                  fileName,
-                  fileType,
-                  year,
-                  month: (month || null) as any,
-                  file
-                }
-              : {
-                  cpf,
-                  fileName,
-                  fileType,
-                  year,
-                  file
-                }
+      const createFilePdfBeneficiary = async (_fileType: IFileType) => {
+        const createFilePDF = await ctx.prisma.beneficiaryPdfFile.create({
+          data: {
+            cpf,
+            fileName,
+            fileType: _fileType,
+            year,
+            month: _fileType === 'HOLERITE' ? month : null,
+            file
+          }
         })
 
-      if (!createFilePdfBeneficiary) {
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'An error occurred while creating the PDF file'
-        })
-      } else {
-        console.log('PDF file created successfully')
+        if (createFilePDF) {
+          console.log(
+            `PDF file ${overwrite ? 'updated' : 'created'} successfully`
+          )
+          const typeResult = overwrite ? 200 : 201
+          console.log(typeResult)
+          return {
+            status: typeResult,
+            message: `PDF file ${overwrite ? 'updated' : 'created'}`,
+            result: fileName
+          }
+        } else {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'An error occurred while creating the PDF file'
+          })
+        }
+      }
 
+      // Check if the file name already exists in the database
+      const fileExists = await ctx.prisma.beneficiaryPdfFile.findFirst({
+        where: { fileName }
+      })
+
+      if (fileExists && !overwrite) {
         return {
-          status: 201,
-          message: 'PDF file uploaded successfully',
+          status: 409,
+          message: 'File already exists.',
           result: fileName
         }
+      } else if (fileExists && overwrite) {
+        const result = await ctx.prisma.beneficiaryPdfFile.deleteMany({
+          where: { fileName }
+        })
+        if (result) {
+          const result = await createFilePdfBeneficiary(fileType)
+          return result
+        } else {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'An error occurred while deleting the PDF file'
+          })
+        }
+      } else {
+        const result = await createFilePdfBeneficiary(fileType)
+        return result
       }
     }),
   getBeneficiaryPdfFiles: t.procedure
