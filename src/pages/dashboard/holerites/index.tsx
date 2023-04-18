@@ -4,7 +4,9 @@ import { BeneficiaryPdfFile } from '@prisma/client'
 import type { NextPage } from 'next'
 import { useSession } from 'next-auth/react'
 
-const Dashboard: NextPage = () => {
+interface Props {}
+
+const Holerites: NextPage<Props> = () => {
   const { data: session } = useSession()
 
   const {
@@ -81,4 +83,4 @@ const Dashboard: NextPage = () => {
   )
 }
 
-export default Dashboard
+export default Holerites

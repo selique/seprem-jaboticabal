@@ -4,7 +4,9 @@ import { BeneficiaryPdfFile } from '@prisma/client'
 import type { NextPage } from 'next'
 import { useSession } from 'next-auth/react'
 
-const Dashboard: NextPage = () => {
+interface Props {}
+
+const InformeDeRendimentos: NextPage<Props> = () => {
   const { data: session } = useSession()
 
   const {
@@ -20,7 +22,7 @@ const Dashboard: NextPage = () => {
 
   if (result && !isLoading && !isError) {
     for (const item of result.result) {
-      if (item.fileType === 'HOLERITE' && item.month && item.year) {
+      if (item.fileType === 'DEMOSTRATIVO_ANUAL' && item.month && item.year) {
         const year = new Date(+item.year, +item.month - 1)
           .getFullYear()
           .toString()
@@ -43,7 +45,7 @@ const Dashboard: NextPage = () => {
   const year = Object.keys(holeritesByYearAndMonth).sort().reverse()
 
   return (
-    <Layout headline="HOLERITES" desc="CLIQUE NO MÊS PARA ABRIR">
+    <Layout headline="INFORME DE RENDIMENTOS" desc="CLIQUE NO MÊS PARA ABRIR">
       {isLoading && <p className="leading-loose text-center">Loading...</p>}
       {isError && (
         <p className="leading-loose text-center text-red-500">
@@ -81,4 +83,4 @@ const Dashboard: NextPage = () => {
   )
 }
 
-export default Dashboard
+export default InformeDeRendimentos

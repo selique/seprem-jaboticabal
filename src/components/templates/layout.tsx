@@ -12,7 +12,7 @@ export const Layout: React.FC<LayoutProps> = ({ headline, desc, ...props }) => {
 
   return (
     <div className="min-h-screen bg-base-200 flex flex-col" {...props}>
-      <header className="navbar my-4 bg-red-300">
+      <header className="navbar my-4 bg-red-100">
         <section className="navbar-section flex items-center justify-between mx-10">
           <a href="#" className="navbar-brand mr-2">
             <Image
@@ -22,20 +22,20 @@ export const Layout: React.FC<LayoutProps> = ({ headline, desc, ...props }) => {
               alt="logo seprem"
             />
           </a>
-          <h2 className="text-4xl font-bold text-red-600">{headline}</h2>
+          <div className="flex flex-col">
+            <h2 className="text-4xl font-bold text-red-500">{headline}</h2>
+            <p className="text-1xl font-bold text-red-500 pt-2">{desc}</p>
+          </div>
           <button
             className="btn btn-link color-red text-2xl ml-auto mr-4"
             onClick={() => signOut({ callbackUrl: '/' })}
           >
-            Sair
+            <span className="font-bold">Sair</span>
           </button>
         </section>
       </header>
 
-      <div className="flex-grow mx-10">
-        <p className="text-2xl font-bold">{desc}</p>
-        {props.children}
-      </div>
+      <div className="flex-grow mx-10">{props.children}</div>
     </div>
   )
 }

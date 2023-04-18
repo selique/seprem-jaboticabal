@@ -5,28 +5,47 @@ interface ButtonProps {
   color?: 'primary' | 'secondary'
   children: React.ReactNode
   onClick?: () => void
+  href?: string
 }
 
 const Button: React.FC<ButtonProps> = ({
   type = 'button',
   color = 'primary',
   children,
-  onClick
+  href,
+  ...props
 }) => {
-  return (
-    <button
-      type={type}
-      className={`
+  if (href !== undefined) {
+    return (
+      <a
+        href={href}
+        className={`
         ${color === 'primary' ? 'bg-blue-500' : 'bg-gray-500'}
-        ${color === 'primary' ? 'hover:bg-blue-700' : 'hover:bg-gray-700'}
-        ${color === 'secondary' ? 'text-gray-700' : 'text-white'}
-        ${color === 'secondary' ? 'hover:text-gray-900' : 'hover:text-white'}
+        ${color === 'primary' ? 'hover:bg-blue-700' : 'hover:text-white'}
+        ${color === 'secondary' ? 'bg-gray-500' : 'text-white'}
+        ${color === 'secondary' ? 'hover:bg-gray-700' : 'hover:text-white'}
         text-white font-bold py-2 px-4 rounded`}
-      onClick={onClick}
-    >
-      {children}
-    </button>
-  )
+        {...props}
+      >
+        {children}
+      </a>
+    )
+  } else {
+    return (
+      <button
+        type={type}
+        className={`
+          ${color === 'primary' ? 'bg-blue-500' : 'bg-gray-500'}
+          ${color === 'primary' ? 'hover:bg-blue-700' : 'hover:text-white'}
+          ${color === 'secondary' ? 'bg-gray-500' : 'text-white'}
+          ${color === 'secondary' ? 'hover:bg-gray-700' : 'hover:text-white'}
+          text-white font-bold py-2 px-4 rounded`}
+        {...props}
+      >
+        {children}
+      </button>
+    )
+  }
 }
 
 export default Button

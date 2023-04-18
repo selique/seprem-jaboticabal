@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import type { NextPage } from 'next'
 import { signIn } from 'next-auth/react'
 import Head from 'next/head'
+import Image from 'next/image'
 import { useForm } from 'react-hook-form'
 
 const Home: NextPage = () => {
@@ -35,8 +36,13 @@ const Home: NextPage = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex items-center justify-center h-screen w-full">
-        <h1 className="text-4xl font-bold">SEPREM JABOTICABAL</h1>
+      <main className="flex flex-col items-center justify-start h-screen w-full">
+        <Image
+          src="/seprem-logo.png"
+          alt="Logo SEPREM"
+          width={200}
+          height={200}
+        />
         <form
           className="bg-gray-100 rounded px-8 pt-6 pb-8 mb-4"
           onSubmit={handleSubmit(onSubmitSignIn)}
@@ -57,9 +63,12 @@ const Home: NextPage = () => {
             required={true}
             register={register}
           />
-          <div className="flex items-center justify-between">
+          <div className="flex justify-between w-72">
             <Button type="submit">Entrar</Button>
-            <Button color="secondary">Esqueci minha senha</Button>
+
+            <Button color="secondary" href="/esqueci-minha-senha">
+              Esqueci minha senha
+            </Button>
           </div>
         </form>
       </main>
