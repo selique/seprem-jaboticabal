@@ -7,7 +7,6 @@ declare module 'next-auth' {
       cpf: string
       password: string
       enrollment: number
-      type_beneficiary: string
     } & DefaultSession['user']
   }
 

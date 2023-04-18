@@ -1,80 +1,83 @@
 import { trpc } from '@/common/trpc'
+import Layout from '@/components/templates/layout'
 import { BeneficiaryPdfFile } from '@prisma/client'
 import type { NextPage } from 'next'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 
-interface Props {}
-
-const Dashboard: NextPage<Props> = () => {
+const Dashboard: NextPage = () => {
   const { data: session } = useSession()
 
   const {
     data: result,
     isLoading,
-    isError,
+    isError
   } = trpc.getBeneficiaryPdfFiles.useQuery({ cpf: session?.user?.cpf || '' })
 
+  const holeritesByYearAndMonth: Record<
+    string,
+    Record<string, BeneficiaryPdfFile[]>
+  > = {}
+
+  if (result && !isLoading && !isError) {
+    for (const item of result.result) {
+      if (item.fileType === 'HOLERITE' && item.month && item.year) {
+        const year = new Date(+item.year, +item.month - 1)
+          .getFullYear()
+          .toString()
+        const month = Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(
+          new Date(+item.year, +item.month - 1)
+        )
+        if (!holeritesByYearAndMonth[year]) {
+          holeritesByYearAndMonth[year] = {}
+        }
+        if (!holeritesByYearAndMonth[year][month]) {
+          holeritesByYearAndMonth[year][month] = []
+        }
+        holeritesByYearAndMonth[year][month].push(
+          item as unknown as BeneficiaryPdfFile
+        )
+      }
+    }
+  }
+
+  const year = Object.keys(holeritesByYearAndMonth).sort().reverse()
+
   return (
-    <div className="hero min-h-screen bg-base-200">
-      <div className="hero-content">
-        <div className="max-w-lg">
-          <h1 className="text-5xl text-center font-bold leading-snug text-gray-400">
-            {session?.user?.name}
-          </h1>
-          {isLoading && (
-            <p className="my-4 text-center leading-loose">Loading...</p>
-          )}
-          {isError && (
-            <p className="my-4 text-center leading-loose text-red-500">
-              Error fetching data. Please try again later.
-            </p>
-          )}
-          {!isLoading && !isError && (
-            <div className="my-4 bg-gray-300 rounded-lg p-4">
-              <h2 className="text-2xl font-bold text-gray-400">PDF Files</h2>
-              <table className="table table-compact">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Download</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result?.result.length > 0 &&
-                    result?.result
-                      .map((item) => ({
-                        ...item,
-                        createdAt: new Date(item.createdAt),
-                        updatedAt: new Date(item.updatedAt),
-                      }))
-                      .map((item: BeneficiaryPdfFile) => (
-                        <tr key={item.id}>
-                          <td>{item.fileName}</td>
-                          <td>
-                            <a
-                              href={`data:application/pdf;base64,${item.file}`}
-                              download={item.fileName}
-                            >
-                              Download
-                            </a>
-                          </td>
-                        </tr>
-                      ))}
-                </tbody>
-              </table>
+    <Layout headline="HOLERITES" desc="CLIQUE NO MÊS PARA ABRIR">
+      {isLoading && <p className="leading-loose text-center">Loading...</p>}
+      {isError && (
+        <p className="leading-loose text-center text-red-500">
+          Error fetching data. Please try again later.
+        </p>
+      )}
+      {!isLoading &&
+        !isError &&
+        year.map((year) => (
+          <div key={year}>
+            <h2 className="mb-2 text-3xl font-bold">{year}</h2>
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-4">
+              {Object.entries(holeritesByYearAndMonth[year])
+                .sort(
+                  ([a], [b]) => new Date(b).getTime() - new Date(a).getTime()
+                )
+                .reverse()
+                .map(([year, items]) => {
+                  return items.map((item) => (
+                    <a
+                      key={`${year}_${item.id}`}
+                      href={`data:application/pdf;base64,${item.file}`}
+                      download={item.fileName}
+                      rel="noreferrer"
+                      className="h-24 text-xl font-bold text-red-600 bg-gray-200 rounded-md cursor-pointer hover:bg-red-300 flex justify-center items-center whitespace-nowrap"
+                    >
+                      <span className="flex items-center">{year}</span>
+                    </a>
+                  ))
+                })}
             </div>
-          )}
-          <div className="text-center">
-            <button
-              className="btn btn-secondary"
-              onClick={() => signOut({ callbackUrl: '/' })}
-            >
-              Logout
-            </button>
           </div>
-        </div>
-      </div>
-    </div>
+        ))}
+    </Layout>
   )
 }
 

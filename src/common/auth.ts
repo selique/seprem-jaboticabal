@@ -13,16 +13,16 @@ export const nextAuthOptions: NextAuthOptions = {
         cpf: {
           label: 'CPF',
           type: 'text',
-          placeholder: '___.___.___-__',
+          placeholder: '___.___.___-__'
         },
-        password: { label: 'Password', type: 'password' },
+        password: { label: 'Password', type: 'password' }
       },
       authorize: async (credentials) => {
         try {
           const { cpf, password } = await loginSchema.parseAsync(credentials)
 
           const result = await prisma.beneficiaryUser.findFirst({
-            where: { cpf },
+            where: { cpf }
           })
 
           if (!result) return null
@@ -35,8 +35,8 @@ export const nextAuthOptions: NextAuthOptions = {
         } catch {
           return null
         }
-      },
-    }),
+      }
+    })
   ],
   callbacks: {
     jwt: async ({ token, user }) => {
@@ -51,14 +51,14 @@ export const nextAuthOptions: NextAuthOptions = {
         session.user.cpf = token.cpf
       }
       return session
-    },
+    }
   },
   jwt: {
-    maxAge: 15 * 24 * 30 * 60, // 15 days
+    maxAge: 15 * 24 * 30 * 60 // 15 days
   },
   pages: {
     signIn: '/',
-    newUser: '/sign-up',
+    newUser: '/sign-up'
   },
-  secret: 'super-secret',
+  secret: 'super-secret'
 }

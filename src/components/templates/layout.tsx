@@ -1,0 +1,43 @@
+import { signOut, useSession } from 'next-auth/react'
+import Image from 'next/image'
+
+interface LayoutProps {
+  headline: string
+  desc: string
+  children?: React.ReactNode
+}
+
+export const Layout: React.FC<LayoutProps> = ({ headline, desc, ...props }) => {
+  const { data: session } = useSession()
+
+  return (
+    <div className="min-h-screen bg-base-200 flex flex-col" {...props}>
+      <header className="navbar my-4 bg-red-100">
+        <section className="navbar-section flex items-center justify-between mx-10">
+          <a href="#" className="navbar-brand mr-2">
+            <Image
+              src="/seprem-logo.png"
+              width={100}
+              height={100}
+              alt="logo seprem"
+            />
+          </a>
+          <div className="flex flex-col">
+            <h2 className="text-4xl font-bold text-red-500">{headline}</h2>
+            <p className="text-1xl font-bold text-red-500 pt-2">{desc}</p>
+          </div>
+          <button
+            className="btn btn-link color-red text-2xl ml-auto mr-4"
+            onClick={() => signOut({ callbackUrl: '/' })}
+          >
+            <span className="font-bold">Sair</span>
+          </button>
+        </section>
+      </header>
+
+      <div className="flex-grow mx-10">{props.children}</div>
+    </div>
+  )
+}
+
+export default Layout

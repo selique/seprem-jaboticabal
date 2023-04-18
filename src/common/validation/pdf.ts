@@ -9,6 +9,7 @@ export const beneficiaryPdfFileSchema = z.object({
   file: z.string(),
   year: z.number(),
   month: z.string().optional().nullable(),
+  overwrite: z.boolean()
 })
 
 export const beneficiaryPdfFileSchemaArray = z.array(beneficiaryPdfFileSchema)

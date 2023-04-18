@@ -5,25 +5,35 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import type { NextPage } from 'next'
 import { signIn } from 'next-auth/react'
 import Head from 'next/head'
+import Image from 'next/image'
 import { useForm } from 'react-hook-form'
-
+import { toast, ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.min.css'
 const Home: NextPage = () => {
   const { register, handleSubmit, reset } = useForm<ILogin>({
     defaultValues: {
       cpf: '',
-      password: '',
+      password: ''
     },
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(loginSchema)
   })
 
   const onSubmitSignIn = async (data: ILogin) => {
-    console.log(data)
     try {
       await signIn('credentials', { ...data, callbackUrl: '/dashboard' })
       reset()
     } catch (error) {
       // handle unexpected error
-      console.error(error)
+      toast.error('Erro ao tentar fazer login!', {
+        position: 'top-center',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'colored'
+      })
     }
   }
 
@@ -35,8 +45,14 @@ const Home: NextPage = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex items-center justify-center h-screen w-full">
-        <h1 className="text-4xl font-bold">SEPREM JABOTICABAL</h1>
+      <main className="flex flex-col items-center justify-start h-screen w-full">
+        <ToastContainer />
+        <Image
+          src="/seprem-logo.png"
+          alt="Logo SEPREM"
+          width={200}
+          height={200}
+        />
         <form
           className="bg-gray-100 rounded px-8 pt-6 pb-8 mb-4"
           onSubmit={handleSubmit(onSubmitSignIn)}
@@ -57,9 +73,12 @@ const Home: NextPage = () => {
             required={true}
             register={register}
           />
-          <div className="flex items-center justify-between">
+          <div className="flex justify-between w-72">
             <Button type="submit">Entrar</Button>
-            <Button color="secondary">Esqueci minha senha</Button>
+
+            <Button color="secondary" href="/esqueci-minha-senha">
+              Esqueci minha senha
+            </Button>
           </div>
         </form>
       </main>
