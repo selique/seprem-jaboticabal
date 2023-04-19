@@ -8,30 +8,31 @@ import { loginSchema } from './validation/auth'
 export const nextAuthOptions: NextAuthOptions = {
   providers: [
     Credentials({
+      id: 'credentials',
       name: 'credentials',
       credentials: {
-        cpf: {
-          label: 'CPF',
-          type: 'text',
-          placeholder: '___.___.___-__'
-        },
+        cpf: { label: 'CPF', type: 'text' },
         password: { label: 'Password', type: 'password' }
       },
       authorize: async (credentials) => {
         try {
           const { cpf, password } = await loginSchema.parseAsync(credentials)
 
-          const result = await prisma.beneficiaryUser.findFirst({
+          const user = await prisma.beneficiaryUser.findFirst({
             where: { cpf }
           })
 
-          if (!result) return null
+          if (!user) return null
 
-          const isValidPassword = await verify(result.password, password)
+          const isValidPassword = await verify(user.password, password)
 
           if (!isValidPassword) return null
 
-          return { id: result.id, cpf }
+          return {
+            id: user.id,
+            name: user.name, // Add the name property to the returned object
+            cpf: user.cpf
+          }
         } catch {
           return null
         }
@@ -48,7 +49,14 @@ export const nextAuthOptions: NextAuthOptions = {
     },
     session: async ({ session, token }) => {
       if (token) {
-        session.user.cpf = token.cpf
+        session = {
+          ...session,
+          user: {
+            ...session.user,
+            cpf: token.cpf,
+            name: token?.name as string
+          }
+        }
       }
       return session
     }
@@ -57,8 +65,7 @@ export const nextAuthOptions: NextAuthOptions = {
     maxAge: 15 * 24 * 30 * 60 // 15 days
   },
   pages: {
-    signIn: '/',
-    newUser: '/sign-up'
+    signIn: '/'
   },
   secret: 'super-secret'
 }
