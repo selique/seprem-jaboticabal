@@ -1,10 +1,10 @@
 import * as z from 'zod'
 
 export const loginSchema = z.object({
-  cpf: z.string(),
+  cpf: z.string().min(14, {
+    message: 'Por favor, digite um CPF válido'
+  }),
   password: z.string()
-  // todo: add password validation based on the requirements enrollment field on schema database
-  // .min(4).max(12),
 })
 
 export const forgetPasswordSchema = z.object({

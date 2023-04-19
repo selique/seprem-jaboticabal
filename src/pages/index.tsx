@@ -73,7 +73,7 @@ const Home: NextPage = () => {
             required={true}
             register={register}
           />
-          <div className="flex justify-between w-72">
+          <div className="flex flex-col justify-between min-w-[300px] space-y-4">
             <Button type="submit">Entrar</Button>
 
             <Button color="secondary" href="/esqueci-minha-senha">
