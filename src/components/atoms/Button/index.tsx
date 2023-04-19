@@ -5,6 +5,7 @@ interface ButtonProps {
   color?: 'primary' | 'secondary'
   children: React.ReactNode
   onClick?: () => void
+  disabled?: boolean
   href?: string
 }
 
