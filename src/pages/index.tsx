@@ -25,18 +25,13 @@ const Home: NextPage = () => {
   })
 
   const onSubmitSignIn = async (data: ILogin) => {
-    console.log(data.cpf)
     try {
-      //141.009.968-70
-      //25044
-      console.count('signIn')
       await signIn('credentials', {
         ...data,
         callbackUrl: '/dashboard',
         redirect: true
       })
         .then((response) => {
-          console.log(response)
           if (response?.error) {
             toast.error('CPF ou Senha incorreto.', {
               position: 'top-center',

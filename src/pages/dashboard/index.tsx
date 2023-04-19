@@ -40,8 +40,6 @@ const Dashboard: NextPage = () => {
 
   const holeritesByYear = getFileDataByType('HOLERITE')
   const demonstrativoAnualByYear = getFileDataByType('DEMOSTRATIVO_ANUAL')
-  console.log({ holeritesByYear })
-  console.log({ demonstrativoAnualByYear })
 
   return (
     <Layout>
