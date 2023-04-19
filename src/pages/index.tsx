@@ -1,11 +1,11 @@
 import Button from '@/components/atoms/Button'
+import DefaultLayout from '@/components/templates/defaultLayout'
 import InputField from '@atoms/InputField'
 import { ILogin, loginSchema } from '@common/validation/auth'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { NextPage } from 'next'
 import { signIn } from 'next-auth/react'
-import Head from 'next/head'
-import Image from 'next/image'
+
 import { useForm } from 'react-hook-form'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.min.css'
@@ -65,20 +65,8 @@ const Home: NextPage = () => {
   }
 
   return (
-    <main className="flex flex-col items-center justify-start h-screen bg-gray-500">
-      <Head>
-        <title>SEPREM JABOTICABAL</title>
-        <meta name="description" content="Portal de consulta SEPREM" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+    <DefaultLayout>
       <ToastContainer />
-      <Image
-        src="/seprem-logo.png"
-        alt="Logo SEPREM"
-        width={200}
-        height={200}
-      />
       <form
         className="bg-white rounded-lg shadow-md px-8 pt-6 pb-8 mb-4 w-[300px] w-fit-content text-gray-800"
         onSubmit={handleSubmit(onSubmitSignIn)}
@@ -112,7 +100,7 @@ const Home: NextPage = () => {
           </Button>
         </div>
       </form>
-    </main>
+    </DefaultLayout>
   )
 }
 

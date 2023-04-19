@@ -2,9 +2,8 @@ import { trpc } from '@/common/trpc'
 import { forgetPasswordSchema } from '@/common/validation/auth'
 import Button from '@/components/atoms/Button'
 import InputField from '@/components/atoms/InputField'
+import DefaultLayout from '@/components/templates/defaultLayout'
 import { zodResolver } from '@hookform/resolvers/zod'
-import Head from 'next/head'
-import Image from 'next/image'
 import { NextPage } from 'next/types'
 import { useForm } from 'react-hook-form'
 import { toast, ToastContainer } from 'react-toastify'
@@ -16,7 +15,12 @@ interface IEsqueciMinhaSenha {
 
 const EsqueciMinhaSenha: NextPage = () => {
   const forgotPasswordMutation = trpc.forgetPassword.useMutation()
-  const { register, handleSubmit, reset } = useForm<IEsqueciMinhaSenha>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset
+  } = useForm<IEsqueciMinhaSenha>({
     defaultValues: {
       cpf: ''
     },
@@ -56,21 +60,9 @@ const EsqueciMinhaSenha: NextPage = () => {
   }
 
   return (
-    <>
-      <Head>
-        <title>SEPREM JABOTICABAL</title>
-        <meta name="description" content="Portal de consulta SEPREM" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+    <DefaultLayout titlePage="Esqueci minha senha">
       <main className="flex flex-col items-center justify-start h-screen w-full">
         <ToastContainer />
-        <Image
-          src="/seprem-logo.png"
-          alt="Logo SEPREM"
-          width={200}
-          height={200}
-        />
         <form
           className="bg-gray-100 rounded px-8 pt-6 pb-8 mb-4"
           onSubmit={handleSubmit(onSubmitForgotPassword)}
@@ -80,13 +72,19 @@ const EsqueciMinhaSenha: NextPage = () => {
             label="CPF"
             type="text"
             placeholder="Digite seu CPF"
-            required={true}
-            register={register}
+            mask="999.999.999-99"
+            error={errors.cpf} // get the error message from the errors object
+            {...register('cpf')} // register the input
           />
-          <Button type="submit">Enviar</Button>
+
+          <div className="flex flex-col justify-between w-full space-y-4">
+            <Button type="submit" color="primary">
+              Resetar senha
+            </Button>
+          </div>
         </form>
       </main>
-    </>
+    </DefaultLayout>
   )
 }
 
