@@ -8,13 +8,10 @@ import { loginSchema } from './validation/auth'
 export const nextAuthOptions: NextAuthOptions = {
   providers: [
     Credentials({
+      id: 'credentials',
       name: 'credentials',
       credentials: {
-        cpf: {
-          label: 'CPF',
-          type: 'text',
-          placeholder: '___.___.___-__'
-        },
+        cpf: { label: 'CPF', type: 'text' },
         password: { label: 'Password', type: 'password' }
       },
       authorize: async (credentials) => {

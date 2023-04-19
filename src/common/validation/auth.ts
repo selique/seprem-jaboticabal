@@ -1,21 +1,22 @@
 import * as z from 'zod'
 
 export const loginSchema = z.object({
-  cpf: z.string().min(14, {
-    message: 'Por favor, digite um CPF válido'
-  }),
-  password: z.string()
+  cpf: z
+    .string()
+    .min(14, {
+      message: 'CPF deve ter 14 dígitos'
+    })
+    .max(14, {
+      message: 'CPF deve ter 14 dígitos'
+    }),
+  password: z.string().min(6, {
+    message: 'Senha deve ter no mínimo 6 dígitos'
+  })
 })
 
 export const forgetPasswordSchema = z.object({
   cpf: z.string() //.min(11).max(11)
 })
 
-export const signUpSchema = loginSchema.extend({
-  cpf: z.string(), // .min(11).max(11)
-  password: z.string()
-})
-
 export type ILogin = z.infer<typeof loginSchema>
 export type IForgetPassword = z.infer<typeof forgetPasswordSchema>
-export type ISignUp = z.infer<typeof signUpSchema>
