@@ -27,25 +27,32 @@ const Home: NextPage = () => {
   const onSubmitSignIn = async (data: ILogin) => {
     console.log(data.cpf)
     try {
+      //000.619.368-47
+      //25642
       console.count('signIn')
       await signIn('credentials', {
+        ...data,
         callbackUrl: '/dashboard',
-        redirect: false
-      }).then((response) => {
-        console.log(response)
-        if (response?.error) {
-          toast.error('CPF ou Senha incorreto.', {
-            position: 'top-center',
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: 'colored'
-          })
-        }
+        redirect: true
       })
+        .then((response) => {
+          console.log(response)
+          if (response?.error) {
+            toast.error('CPF ou Senha incorreto.', {
+              position: 'top-center',
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: 'colored'
+            })
+          }
+        })
+        .catch((error) => {
+          console.log(error)
+        })
     } catch (error) {
       // handle unexpected error
       toast.error('Se o erro persistir entre em contato com a Prefeitura', {
