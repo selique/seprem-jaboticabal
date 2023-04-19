@@ -9,8 +9,8 @@ export const loginSchema = z.object({
     .max(14, {
       message: 'CPF deve ter 14 dígitos'
     }),
-  password: z.string().min(6, {
-    message: 'Senha deve ter no mínimo 6 dígitos'
+  password: z.string().min(5, {
+    message: 'Senha deve ter no mínimo 5 dígitos'
   })
 })
 
