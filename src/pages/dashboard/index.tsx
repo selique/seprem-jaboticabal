@@ -101,26 +101,38 @@ const Dashboard: NextPage = () => {
                 <h2 className="mb-2 text-3xl font-bold">{year}</h2>
                 <div className="grid gap-4 grid-cols-1 sm:grid-cols-4">
                   {holeritesByYear[year]
-                    .sort(
-                      (a, b) =>
-                        new Date(b.year, b.month - 1).getTime() -
-                        new Date(a.year, a.month - 1).getTime()
-                    )
-                    .map((item) => (
-                      <a
-                        key={`${year}_${item.id}`}
-                        href={`data:application/pdf;base64,${item.file}`}
-                        download={item.fileName}
-                        rel="noreferrer"
-                        className="h-24 text-xl font-bold text-red-600 bg-gray-200 rounded-md cursor-pointer hover:bg-red-300 flex justify-center items-center whitespace-nowrap"
-                      >
-                        <span className="flex items-center">
-                          {Intl.DateTimeFormat('pt-BR', {
+                    .filter((item) => item !== null && item !== undefined)
+                    .sort((a, b) => {
+                      const aMonth = a.month ?? 0
+                      const bMonth = b.month ?? 0
+                      return (
+                        new Date(b.year, (bMonth as any) - 1).getTime() -
+                        new Date(a.year, (aMonth as any) - 1).getTime()
+                      )
+                    })
+                    .map((item) => {
+                      const monthName = item.month
+                        ? Intl.DateTimeFormat('pt-BR', {
                             month: 'long'
-                          }).format(new Date(item.year, item.month - 1))}
-                        </span>
-                      </a>
-                    ))}
+                          }).format(
+                            new Date(
+                              item.year,
+                              (item.month as unknown as number) - 1
+                            )
+                          )
+                        : ''
+                      return (
+                        <a
+                          key={`${year}_${item.id}`}
+                          href={`data:application/pdf;base64,${item.file}`}
+                          download={item.fileName}
+                          rel="noreferrer"
+                          className="h-24 text-xl font-bold text-red-600 bg-gray-200 rounded-md cursor-pointer hover:bg-red-300 flex justify-center items-center whitespace-nowrap"
+                        >
+                          <span className="flex items-center">{monthName}</span>
+                        </a>
+                      )
+                    })}
                 </div>
               </div>
             ))}
