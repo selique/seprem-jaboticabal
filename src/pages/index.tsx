@@ -27,8 +27,8 @@ const Home: NextPage = () => {
   const onSubmitSignIn = async (data: ILogin) => {
     console.log(data.cpf)
     try {
-      //000.619.368-47
-      //25642
+      //141.009.968-70
+      //25044
       console.count('signIn')
       await signIn('credentials', {
         ...data,
