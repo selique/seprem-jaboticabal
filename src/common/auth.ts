@@ -24,6 +24,8 @@ export const nextAuthOptions: NextAuthOptions = {
 
           if (!user) return null
 
+          const needChangePassword = password === user.enrollment.toString()
+
           const isValidPassword = await verify(user.password, password)
 
           if (!isValidPassword) return null
@@ -31,7 +33,8 @@ export const nextAuthOptions: NextAuthOptions = {
           return {
             id: user.id,
             name: user.name, // Add the name property to the returned object
-            cpf: user.cpf
+            cpf: user.cpf,
+            needChangePassword: needChangePassword
           }
         } catch {
           return null
@@ -54,10 +57,12 @@ export const nextAuthOptions: NextAuthOptions = {
           user: {
             ...session.user,
             cpf: token.cpf,
-            name: token?.name as string
+            name: token?.name as string,
+            needChangePassword: token?.needChangePassword as boolean
           }
         }
       }
+
       return session
     }
   },
@@ -67,5 +72,5 @@ export const nextAuthOptions: NextAuthOptions = {
   pages: {
     signIn: '/'
   },
-  secret: 'super-secret'
+  secret: process.env.NEXTAUTH_SECRET
 }

@@ -7,6 +7,7 @@ declare module 'next-auth' {
       cpf: string
       password: string
       enrollment: number
+      needChangePassword: boolean
     } & DefaultSession['user']
   }
 
