@@ -4,6 +4,7 @@ import Button from '@/components/atoms/Button'
 import InputField from '@/components/atoms/InputField'
 import { zodResolver } from '@hookform/resolvers/zod'
 import clsx from 'clsx'
+import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { toast, ToastContainer } from 'react-toastify'
@@ -18,6 +19,7 @@ const ResetPassword = ({ name, cpf }: IResetPasswordProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const resetPasswordMutation = trpc.resetPassword.useMutation()
   const queryVerifyResetPassword = trpc.verifyResetPassword.useQuery({ cpf })
+  const router = useRouter()
 
   useEffect(() => {
     if (queryVerifyResetPassword.data?.result) {
@@ -42,20 +44,18 @@ const ResetPassword = ({ name, cpf }: IResetPasswordProps) => {
   const onSubmitResetPassword: SubmitHandler<IResetPassword> = async (data) => {
     try {
       await resetPasswordMutation.mutateAsync(data)
-      setIsOpen(false)
+
       toast.success('Senha resetada com sucesso!', {
         position: 'top-center',
-        autoClose: 5000,
+        autoClose: 2000,
         hideProgressBar: false,
         closeOnClick: true,
-        pauseOnHover: true,
+        pauseOnHover: false,
         draggable: true,
         progress: undefined,
         theme: 'colored',
         onClose: () => {
-          setTimeout(() => {
-            reset()
-          }, 5000)
+          setIsOpen(false)
         }
       })
     } catch (error) {
@@ -64,14 +64,17 @@ const ResetPassword = ({ name, cpf }: IResetPasswordProps) => {
         autoClose: 5000,
         hideProgressBar: false,
         closeOnClick: true,
-        pauseOnHover: true,
+        pauseOnHover: false,
         draggable: true,
         progress: undefined,
-        theme: 'colored'
+        theme: 'colored',
+        onClose: () => {
+          router.reload()
+        }
       })
 
-      // handle unexpected error
-      console.error({ error })
+      // // handle unexpected error
+      // console.error({ error })
     }
   }
 

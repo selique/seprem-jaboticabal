@@ -31,19 +31,16 @@ const EsqueciMinhaSenha: NextPage = () => {
       await forgotPasswordMutation.mutateAsync(data)
       toast.success('Senha resetada com sucesso!', {
         position: 'top-center',
-        autoClose: 5000,
+        autoClose: 2000,
         hideProgressBar: false,
         closeOnClick: true,
-        pauseOnHover: true,
+        pauseOnHover: false,
         draggable: true,
         progress: undefined,
         theme: 'colored',
         onClose: () => {
-          setTimeout(() => {
-            reset()
-            // redirect to reset password page
-            router.push('/')
-          }, 5000)
+          // redirect to reset password page
+          router.push('/')
         }
       })
     } catch (error) {

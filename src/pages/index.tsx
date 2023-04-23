@@ -35,10 +35,10 @@ const Home: NextPage = () => {
       if (response?.status === 200) {
         toast.success('Login realizado com sucesso.', {
           position: 'top-center',
-          autoClose: 2500,
+          autoClose: 2000,
           hideProgressBar: false,
           closeOnClick: true,
-          pauseOnHover: true,
+          pauseOnHover: false,
           draggable: true,
           progress: undefined,
           theme: 'colored',
