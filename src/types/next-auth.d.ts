@@ -10,8 +10,9 @@ declare module 'next-auth' {
     } & DefaultSession['user']
   }
 
-  interface User extends DefaultUser {
+  interface User {
     cpf: string
+    name: string
   }
 }
 

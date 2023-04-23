@@ -1,17 +1,14 @@
 import { trpc } from '@/common/trpc'
-import { forgetPasswordSchema } from '@/common/validation/auth'
+import { forgetPasswordSchema, IForgetPassword } from '@/common/validation/auth'
 import Button from '@/components/atoms/Button'
 import InputField from '@/components/atoms/InputField'
 import DefaultLayout from '@/components/templates/defaultLayout'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useRouter } from 'next/router'
 import { NextPage } from 'next/types'
 import { useForm } from 'react-hook-form'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.min.css'
-
-interface IEsqueciMinhaSenha {
-  cpf: string
-}
 
 const EsqueciMinhaSenha: NextPage = () => {
   const forgotPasswordMutation = trpc.forgetPassword.useMutation()
@@ -20,28 +17,32 @@ const EsqueciMinhaSenha: NextPage = () => {
     handleSubmit,
     formState: { errors },
     reset
-  } = useForm<IEsqueciMinhaSenha>({
+  } = useForm<IForgetPassword>({
     defaultValues: {
       cpf: ''
     },
     resolver: zodResolver(forgetPasswordSchema)
   })
 
-  const onSubmitForgotPassword = async (data: IEsqueciMinhaSenha) => {
+  const router = useRouter()
+
+  const onSubmitForgotPassword = async (data: IForgetPassword) => {
     try {
       await forgotPasswordMutation.mutateAsync(data)
       toast.success('Senha resetada com sucesso!', {
         position: 'top-center',
-        autoClose: 5000,
+        autoClose: 2000,
         hideProgressBar: false,
         closeOnClick: true,
-        pauseOnHover: true,
+        pauseOnHover: false,
         draggable: true,
         progress: undefined,
-        theme: 'colored'
+        theme: 'colored',
+        onClose: () => {
+          // redirect to reset password page
+          router.push('/')
+        }
       })
-      reset()
-      // redirect to reset password page
     } catch (error) {
       toast.error('Erro ao tentar resetar a senha!', {
         position: 'top-center',
@@ -53,9 +54,6 @@ const EsqueciMinhaSenha: NextPage = () => {
         progress: undefined,
         theme: 'colored'
       })
-
-      // handle unexpected error
-      console.error({ error })
     }
   }
 

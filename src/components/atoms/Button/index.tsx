@@ -4,15 +4,18 @@ interface ButtonProps {
   type?: 'button' | 'submit' | 'reset'
   color?: 'primary' | 'secondary'
   children: React.ReactNode
-  onClick?: () => void
   disabled?: boolean
   href?: string
+  onClick?: () => void
+  className?: string
 }
 
 const Button: React.FC<ButtonProps> = ({
   type = 'button',
   color = 'primary',
   children,
+  className,
+  onClick,
   href,
   ...props
 }) => {
@@ -30,6 +33,7 @@ const Button: React.FC<ButtonProps> = ({
           ${color === 'primary' ? 'hover:bg-blue-800' : 'hover:text-white'}
           ${color === 'secondary' ? 'bg-gray-600' : 'text-white'}
           ${color === 'secondary' ? 'hover:bg-gray-800' : 'hover:text-white'}
+          ${className}
         `}
         {...props}
       >
@@ -47,6 +51,7 @@ const Button: React.FC<ButtonProps> = ({
           ${color === 'secondary' ? 'bg-gray-600' : 'text-white'}
           ${color === 'secondary' ? 'hover:bg-gray-800' : 'hover:text-white'}
         `}
+        onClick={onClick}
         {...props}
       >
         {children}

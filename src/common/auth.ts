@@ -43,6 +43,7 @@ export const nextAuthOptions: NextAuthOptions = {
     jwt: async ({ token, user }) => {
       if (user) {
         token.cpf = user.cpf
+        token.name = user.name
       }
 
       return token
@@ -58,6 +59,7 @@ export const nextAuthOptions: NextAuthOptions = {
           }
         }
       }
+
       return session
     }
   },
@@ -67,5 +69,5 @@ export const nextAuthOptions: NextAuthOptions = {
   pages: {
     signIn: '/'
   },
-  secret: 'super-secret'
+  secret: process.env.NEXTAUTH_SECRET
 }

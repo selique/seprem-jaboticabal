@@ -10,7 +10,7 @@ export const Layout: React.FC<LayoutProps> = ({ ...props }) => {
 
   return (
     <div className="min-h-screen bg-base-200 flex flex-col" {...props}>
-      <header className="navbar my-4 bg-red-100">
+      <header className="navbar bg-red-100">
         <section className="navbar-section flex items-center justify-between mx-10">
           <a href="#" className="navbar-brand mr-2">
             <Image
@@ -34,7 +34,7 @@ export const Layout: React.FC<LayoutProps> = ({ ...props }) => {
         </section>
       </header>
 
-      <div className="flex-grow mx-10">{props.children}</div>
+      <div className="flex-grow mx-10 my-4">{props.children}</div>
     </div>
   )
 }
