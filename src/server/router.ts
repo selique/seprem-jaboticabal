@@ -225,7 +225,6 @@ export const serverRouter = t.router({
       })
 
       if (!beneficiary) {
-        console.log('Beneficiary not found.')
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: 'Beneficiary not found.'
@@ -236,10 +235,10 @@ export const serverRouter = t.router({
         beneficiary.password,
         beneficiary.enrollment.toString()
       )
-      console.log('isValidPassword', isValidPassword)
+
       if (isValidPassword) {
         const hashedPassword = await hash(password)
-        console.log('hashedPassword', hashedPassword)
+
         return await ctx.prisma.beneficiaryUser.update({
           where: { cpf },
           data: {
@@ -256,7 +255,6 @@ export const serverRouter = t.router({
       const beneficiary = await ctx.prisma.beneficiaryUser.findFirst({
         where: { cpf }
       })
-      console.log('beneficiary', beneficiary)
 
       if (!beneficiary) {
         return
@@ -266,7 +264,7 @@ export const serverRouter = t.router({
         beneficiary.password,
         beneficiary.enrollment.toString()
       )
-      console.log('isValidPassword', isValidPassword)
+
       if (isValidPassword) {
         return {
           status: 200,
