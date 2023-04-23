@@ -7,12 +7,12 @@ declare module 'next-auth' {
       cpf: string
       password: string
       enrollment: number
-      needChangePassword: boolean
     } & DefaultSession['user']
   }
 
-  interface User extends DefaultUser {
+  interface User {
     cpf: string
+    name: string
   }
 }
 

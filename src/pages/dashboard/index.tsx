@@ -1,48 +1,65 @@
 import { trpc } from '@/common/trpc'
 import { IFileType } from '@/common/validation/pdf'
-import Layout from '@/components/templates/layout'
+import ResetPassword from '@/components/organisms/ResetPassword'
+import Layout from '@components/templates/layout'
 import { BeneficiaryPdfFile } from '@prisma/client'
 import * as Tabs from '@radix-ui/react-tabs'
 import { clsx } from 'clsx'
 import type { NextPage } from 'next'
 import { useSession } from 'next-auth/react'
-
+import { useCallback, useMemo } from 'react'
 const Dashboard: NextPage = () => {
   const { data: session } = useSession()
 
   const {
-    data: result,
+    data: dataGetBeneficiaryPdfFiles,
     isLoading,
     isError
-  } = trpc.getBeneficiaryPdfFiles.useQuery({ cpf: session?.user?.cpf || '' })
+  } = trpc.getBeneficiaryPdfFiles.useQuery({
+    cpf: session?.user.cpf ?? ''
+  })
 
-  const getFileDataByType = (fileType: IFileType) => {
-    const filteredFiles =
-      result?.result.filter(
-        (item) =>
-          item.fileType === fileType && (item.month !== null ? true : item.year)
-      ) || []
+  const getFileDataByType = useCallback(
+    (fileType: IFileType) => {
+      const filteredFiles =
+        dataGetBeneficiaryPdfFiles?.result?.filter(
+          (item) =>
+            item.fileType === fileType &&
+            (item.month !== null ? true : item.year)
+        ) || []
 
-    return filteredFiles.reduce<Record<string, BeneficiaryPdfFile[]>>(
-      (acc, item) => {
-        const year = new Date(+item.year, 0).getFullYear().toString()
+      return filteredFiles.reduce<Record<string, BeneficiaryPdfFile[]>>(
+        (acc, item) => {
+          const year = new Date(+item.year, 0).getFullYear().toString()
 
-        if (!acc[year]) {
-          acc[year] = []
-        }
-        acc[year].push(item as unknown as BeneficiaryPdfFile)
+          if (!acc[year]) {
+            acc[year] = []
+          }
+          acc[year].push(item as unknown as BeneficiaryPdfFile)
 
-        return acc
-      },
-      {} as Record<string, BeneficiaryPdfFile[]> // <-- index expression type annotation
-    )
-  }
+          return acc
+        },
+        {} as Record<string, BeneficiaryPdfFile[]> // <-- index expression type annotation
+      )
+    },
+    [dataGetBeneficiaryPdfFiles]
+  )
 
-  const holeritesByYear = getFileDataByType('HOLERITE')
-  const demonstrativoAnualByYear = getFileDataByType('DEMOSTRATIVO_ANUAL')
+  const holeritesByYear = useMemo(
+    () => getFileDataByType('HOLERITE'),
+    [getFileDataByType]
+  )
+
+  const demonstrativoAnualByYear = useMemo(
+    () => getFileDataByType('DEMOSTRATIVO_ANUAL'),
+    [getFileDataByType]
+  )
 
   return (
     <Layout>
+      {session && (
+        <ResetPassword name={session.user.name} cpf={session.user.cpf} />
+      )}
       {isLoading && <p className="leading-loose text-center">Loading...</p>}
       {isError && (
         <p className="leading-loose text-center text-red-500">
@@ -55,6 +72,7 @@ const Dashboard: NextPage = () => {
           aria-label="Manage your account"
         >
           <Tabs.Trigger
+            data-testid="holerites-tab"
             className={clsx(
               'group',
               'border rounded-lg',
@@ -71,6 +89,7 @@ const Dashboard: NextPage = () => {
             </span>
           </Tabs.Trigger>
           <Tabs.Trigger
+            data-testid="nformes-de-rendimento-tab"
             className={clsx(
               'group',
               'border rounded-lg',
@@ -93,7 +112,7 @@ const Dashboard: NextPage = () => {
         >
           {!isLoading &&
             !isError &&
-            result &&
+            dataGetBeneficiaryPdfFiles &&
             Object.keys(holeritesByYear).map((year) => (
               <div key={year}>
                 <h2 className="mb-2 text-3xl font-bold">{year}</h2>
@@ -141,7 +160,7 @@ const Dashboard: NextPage = () => {
         >
           {!isLoading &&
             !isError &&
-            result &&
+            dataGetBeneficiaryPdfFiles &&
             Object.keys(demonstrativoAnualByYear).map((year) => (
               <div key={year}>
                 <div className="grid gap-4 grid-cols-1 sm:grid-cols-4">

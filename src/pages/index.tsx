@@ -61,7 +61,6 @@ const Home: NextPage = () => {
         theme: 'colored'
       })
     } finally {
-      console.count('finally')
       reset()
     }
   }

@@ -24,8 +24,6 @@ export const nextAuthOptions: NextAuthOptions = {
 
           if (!user) return null
 
-          const needChangePassword = password === user.enrollment.toString()
-
           const isValidPassword = await verify(user.password, password)
 
           if (!isValidPassword) return null
@@ -33,8 +31,7 @@ export const nextAuthOptions: NextAuthOptions = {
           return {
             id: user.id,
             name: user.name, // Add the name property to the returned object
-            cpf: user.cpf,
-            needChangePassword: needChangePassword
+            cpf: user.cpf
           }
         } catch {
           return null
@@ -46,6 +43,7 @@ export const nextAuthOptions: NextAuthOptions = {
     jwt: async ({ token, user }) => {
       if (user) {
         token.cpf = user.cpf
+        token.name = user.name
       }
 
       return token
@@ -57,8 +55,7 @@ export const nextAuthOptions: NextAuthOptions = {
           user: {
             ...session.user,
             cpf: token.cpf,
-            name: token?.name as string,
-            needChangePassword: token?.needChangePassword as boolean
+            name: token?.name as string
           }
         }
       }

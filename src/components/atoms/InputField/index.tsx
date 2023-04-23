@@ -30,18 +30,20 @@ const InputField = React.forwardRef<ReactInputMask, InputProps>(
             mask={mask}
             className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
               className ?? ''
-            } ${error ? 'border-red-500' : ''}`}
+            } 
+            ${error ? 'border-red-500' : ''}`}
             id={id}
             type={type}
             placeholder={placeholder}
-            {...props}
             ref={ref as ForwardedRef<ReactInputMask>}
+            {...props}
           />
         ) : (
           <input
             className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
               className ?? ''
-            } ${error ? 'border-red-500' : ''}`}
+            } 
+            ${error ? 'border-red-500' : ''}`}
             id={id}
             type={type}
             placeholder={placeholder}

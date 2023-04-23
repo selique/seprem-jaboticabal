@@ -6,6 +6,7 @@ interface ButtonProps {
   children: React.ReactNode
   disabled?: boolean
   href?: string
+  onClick?: () => void
   className?: string
 }
 
@@ -14,6 +15,7 @@ const Button: React.FC<ButtonProps> = ({
   color = 'primary',
   children,
   className,
+  onClick,
   href,
   ...props
 }) => {
@@ -49,6 +51,7 @@ const Button: React.FC<ButtonProps> = ({
           ${color === 'secondary' ? 'bg-gray-600' : 'text-white'}
           ${color === 'secondary' ? 'hover:bg-gray-800' : 'hover:text-white'}
         `}
+        onClick={onClick}
         {...props}
       >
         {children}

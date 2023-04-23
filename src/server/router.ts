@@ -1,9 +1,13 @@
 import { initTRPC, TRPCError } from '@trpc/server'
-import { hash } from 'argon2'
+import { hash, verify } from 'argon2'
 
-import { forgetPasswordSchema } from '@/common/validation/auth'
+import {
+  forgetPasswordSchema,
+  resetPasswordSchema
+} from '@/common/validation/auth'
 import { beneficiarySchema } from '@common/validation/beneficiary'
 import { beneficiaryPdfFileSchema, IFileType } from '@common/validation/pdf'
+import { BeneficiaryUser } from '@prisma/client'
 import { IContext } from '@server/context'
 import * as z from 'zod'
 
@@ -188,9 +192,10 @@ export const serverRouter = t.router({
     .mutation(async ({ input, ctx }) => {
       const { cpf } = input
 
-      const beneficiary = await ctx.prisma.beneficiaryUser.findFirst({
-        where: { cpf }
-      })
+      const beneficiary: BeneficiaryUser | null =
+        await ctx.prisma.beneficiaryUser.findFirst({
+          where: { cpf }
+        })
 
       if (!beneficiary) {
         throw new TRPCError({
@@ -199,12 +204,82 @@ export const serverRouter = t.router({
         })
       }
 
+      const hashedPassword: string = await hash(
+        beneficiary.enrollment.toString()
+      )
+
       return await ctx.prisma.beneficiaryUser.update({
         where: { cpf },
         data: {
-          password: beneficiary.enrollment.toString()
+          password: hashedPassword
         }
       })
+    }),
+  resetPassword: t.procedure
+    .input(resetPasswordSchema)
+    .mutation(async ({ input, ctx }) => {
+      const { cpf, password } = input
+
+      const beneficiary = await ctx.prisma.beneficiaryUser.findFirst({
+        where: { cpf }
+      })
+
+      if (!beneficiary) {
+        console.log('Beneficiary not found.')
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Beneficiary not found.'
+        })
+      }
+
+      const isValidPassword = await verify(
+        beneficiary.password,
+        beneficiary.enrollment.toString()
+      )
+      console.log('isValidPassword', isValidPassword)
+      if (isValidPassword) {
+        const hashedPassword = await hash(password)
+        console.log('hashedPassword', hashedPassword)
+        return await ctx.prisma.beneficiaryUser.update({
+          where: { cpf },
+          data: {
+            password: hashedPassword
+          }
+        })
+      }
+    }),
+  verifyResetPassword: t.procedure
+    .input(z.object({ cpf: z.string() }).catchall(z.any()))
+    .query(async ({ input, ctx }) => {
+      const { cpf } = input
+
+      const beneficiary = await ctx.prisma.beneficiaryUser.findFirst({
+        where: { cpf }
+      })
+      console.log('beneficiary', beneficiary)
+
+      if (!beneficiary) {
+        return
+      }
+
+      const isValidPassword = await verify(
+        beneficiary.password,
+        beneficiary.enrollment.toString()
+      )
+      console.log('isValidPassword', isValidPassword)
+      if (isValidPassword) {
+        return {
+          status: 200,
+          message: 'Beneficiary found successfully',
+          result: isValidPassword
+        }
+      } else {
+        return {
+          status: 404,
+          message: 'Beneficiary not found',
+          result: isValidPassword
+        }
+      }
     })
 })
 
