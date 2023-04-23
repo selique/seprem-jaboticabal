@@ -5,6 +5,7 @@ import { ILogin, loginSchema } from '@common/validation/auth'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { NextPage } from 'next'
 import { signIn } from 'next-auth/react'
+import { useRouter } from 'next/router'
 
 import { useForm } from 'react-hook-form'
 import { toast, ToastContainer } from 'react-toastify'
@@ -23,46 +24,41 @@ const Home: NextPage = () => {
     },
     resolver: zodResolver(loginSchema)
   })
+  const router = useRouter()
 
   const onSubmitSignIn = async (data: ILogin) => {
-    try {
-      await signIn('credentials', {
-        ...data,
-        callbackUrl: '/dashboard',
-        redirect: true
-      })
-        .then((response) => {
-          if (response?.error) {
-            toast.error('CPF ou Senha incorreto.', {
-              position: 'top-center',
-              autoClose: 5000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: 'colored'
-            })
+    await signIn('credentials', {
+      ...data,
+      redirect: false,
+      callbackUrl: '/dashboard'
+    }).then((response) => {
+      if (response?.status === 200) {
+        toast.success('Login realizado com sucesso.', {
+          position: 'top-center',
+          autoClose: 2500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'colored',
+          onClose: () => {
+            router.push('/dashboard')
           }
         })
-        .catch((error) => {
-          console.log(error)
+      } else {
+        toast.error('CPF ou Senha incorreto.', {
+          position: 'top-center',
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'colored'
         })
-    } catch (error) {
-      // handle unexpected error
-      toast.error('Se o erro persistir entre em contato com a Prefeitura', {
-        position: 'top-center',
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: 'colored'
-      })
-    } finally {
-      reset()
-    }
+      }
+    })
   }
 
   return (
@@ -78,8 +74,8 @@ const Home: NextPage = () => {
           type="text"
           placeholder="Digite seu CPF"
           mask="999.999.999-99"
-          error={errors.cpf} // get the error message from the errors object
           {...register('cpf')} // register the input
+          error={errors.cpf} // get the error message from the errors object
         />
 
         <InputField
@@ -87,8 +83,8 @@ const Home: NextPage = () => {
           label="Senha"
           type="password"
           placeholder="Digite sua senha"
-          error={errors.password} // get the error message from the errors object
           {...register('password')} // register the input
+          error={errors.password} // get the error message from the errors object
         />
 
         <div className="flex flex-col justify-between w-full space-y-4">
