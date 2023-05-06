@@ -83,35 +83,27 @@ const Dashboard: NextPage = () => {
             data-testid="holerites-tab"
             className={clsx(
               'group',
-              'border rounded-lg',
-              'border-gray-400 ',
-              'radix-state-active:bg-gray-300 focus-visible:radix-state-active:border-b-transparent radix-state-inactive:bg-gray-50',
-              'flex-1 px-3 py-2.5',
-              'focus:radix-state-active:border-b-red',
-              'focus:z-10 focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75'
+              'rounded-lg',
+              'radix-state-active:bg-secondary radix-state-active:text-gray-50 text-lg font-medium focus-visible:radix-state-active:border-b-transparent radix-state-inactive:bg-gray-200',
+              'flex-1 p-4 mr-2',
+              'focus:radix-state-active:border-b-red'
             )}
             value="holerites"
           >
-            <span className={clsx('text-sm font-medium', 'text-gray-700')}>
-              Holerites
-            </span>
+            Holerites
           </Tabs.Trigger>
           <Tabs.Trigger
             data-testid="nformes-de-rendimento-tab"
             className={clsx(
               'group',
-              'border rounded-lg',
-              'border-gray-400',
-              'radix-state-active:bg-gray-300 focus-visible:radix-state-active:border-b-transparent radix-state-inactive:bg-gray-50',
-              'flex-1 px-3 py-2.5',
-              'focus:radix-state-active:border-b-red',
-              'focus:z-10 focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75'
+              'rounded-lg',
+              'radix-state-active:bg-secondary radix-state-active:text-gray-50 text-lg font-medium focus-visible:radix-state-active:border-b-transparent radix-state-inactive:bg-gray-200',
+              'flex-1 p-4 ml-2',
+              'focus:radix-state-active:border-b-red'
             )}
             value="informes-de-rendimento"
           >
-            <span className={clsx('text-sm font-medium', 'text-gray-700 ')}>
-              Informes de Rendimento
-            </span>
+            Informes de Rendimento
           </Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content
