@@ -62,13 +62,13 @@ const Dashboard: NextPage = () => {
       )}
       {isLoading && <p className="leading-loose text-center">Loading...</p>}
       {isError && (
-        <p className="leading-loose text-center text-red-500">
+        <p className="leading-loose text-center text-primary">
           Error fetching data. Please try again later.
         </p>
       )}
       <Tabs.Root className="TabsRoot" defaultValue="holerites">
         <Tabs.List
-          className={clsx('flex w-full rounded-t-lg bg-white ')}
+          className={clsx('flex w-full rounded-t-lg')}
           aria-label="Manage your account"
         >
           <Tabs.Trigger
@@ -144,7 +144,7 @@ const Dashboard: NextPage = () => {
                           href={`data:application/pdf;base64,${item.file}`}
                           download={item.fileName}
                           rel="noreferrer"
-                          className="h-24 text-xl font-bold text-red-600 bg-gray-200 rounded-md cursor-pointer hover:bg-red-300 flex justify-center items-center whitespace-nowrap"
+                          className="h-24 text-xl font-bold text-gray-800 bg-gray-200 rounded-md cursor-pointer hover:bg-secondary hover:text-gray-50 flex justify-center items-center whitespace-nowrap"
                         >
                           <span className="flex items-center">{monthName}</span>
                         </a>
@@ -172,7 +172,7 @@ const Dashboard: NextPage = () => {
                         href={`data:application/pdf;base64,${item.file}`}
                         download={item.fileName}
                         rel="noreferrer"
-                        className="h-24 text-xl font-bold text-red-600 bg-gray-200 rounded-md cursor-pointer hover:bg-red-300 flex justify-center items-center whitespace-nowrap"
+                        className="h-24 text-xl font-bold text-gray-800 bg-gray-200 rounded-md cursor-pointer hover:bg-secondary hover:text-gray-50 flex justify-center items-center whitespace-nowrap"
                       >
                         <span className="flex items-center">{item.year}</span>
                       </a>
