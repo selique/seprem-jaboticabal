@@ -7,6 +7,7 @@ import * as Tabs from '@radix-ui/react-tabs'
 import { clsx } from 'clsx'
 import type { NextPage } from 'next'
 import { useSession } from 'next-auth/react'
+import Image from 'next/image'
 import { useCallback, useMemo } from 'react'
 const Dashboard: NextPage = () => {
   const { data: session } = useSession()
@@ -68,80 +69,120 @@ const Dashboard: NextPage = () => {
       {session && (
         <ResetPassword name={session.user.name} cpf={session.user.cpf} />
       )}
-      {isLoading && <p className="leading-loose text-center">Loading...</p>}
-      {isError && (
-        <p className="leading-loose text-center text-primary">
-          Error fetching data. Please try again later.
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center w-full h-full">
+          <Image
+            className="animate-bounce w-1/3"
+            src="/seprem-logo.png"
+            alt="SEPREM"
+            width={200}
+            height={200}
+          />
+        </div>
+      ) : isError ? (
+        <p className="leading-loose text-center text-primary text-lg">
+          Ocorreu um erro ao carregar os dados, atualize a página ou tente mais
+          tarde.
         </p>
-      )}
-      <Tabs.Root className="TabsRoot" defaultValue="holerites">
-        <Tabs.List
-          className={clsx('flex w-full rounded-t-lg')}
-          aria-label="Manage your account"
-        >
-          <Tabs.Trigger
-            data-testid="holerites-tab"
-            className={clsx(
-              'group',
-              'rounded-lg',
-              'radix-state-active:bg-secondary radix-state-active:text-gray-50 text-lg font-medium focus-visible:radix-state-active:border-b-transparent radix-state-inactive:bg-gray-200',
-              'flex-1 p-4 mr-2',
-              'focus:radix-state-active:border-b-red'
-            )}
+      ) : (
+        <Tabs.Root className="TabsRoot" defaultValue="holerites">
+          <Tabs.List
+            className={clsx('flex w-full rounded-t-lg')}
+            aria-label="Manage your account"
+          >
+            <Tabs.Trigger
+              data-testid="holerites-tab"
+              className={clsx(
+                'group',
+                'rounded-lg',
+                'radix-state-active:bg-secondary radix-state-active:text-gray-50 text-lg font-medium focus-visible:radix-state-active:border-b-transparent radix-state-inactive:bg-gray-200',
+                'flex-1 p-4 mr-2',
+                'focus:radix-state-active:border-b-red'
+              )}
+              value="holerites"
+            >
+              Holerites
+            </Tabs.Trigger>
+            <Tabs.Trigger
+              data-testid="nformes-de-rendimento-tab"
+              className={clsx(
+                'group',
+                'rounded-lg',
+                'radix-state-active:bg-secondary radix-state-active:text-gray-50 text-lg font-medium focus-visible:radix-state-active:border-b-transparent radix-state-inactive:bg-gray-200',
+                'flex-1 p-4 ml-2',
+                'focus:radix-state-active:border-b-red'
+              )}
+              value="informes-de-rendimento"
+            >
+              Informes de Rendimento
+            </Tabs.Trigger>
+          </Tabs.List>
+          <Tabs.Content
+            className={clsx('rounded-b-lg bg-white px-6 py-4')}
             value="holerites"
           >
-            Holerites
-          </Tabs.Trigger>
-          <Tabs.Trigger
-            data-testid="nformes-de-rendimento-tab"
-            className={clsx(
-              'group',
-              'rounded-lg',
-              'radix-state-active:bg-secondary radix-state-active:text-gray-50 text-lg font-medium focus-visible:radix-state-active:border-b-transparent radix-state-inactive:bg-gray-200',
-              'flex-1 p-4 ml-2',
-              'focus:radix-state-active:border-b-red'
-            )}
+            {!isLoading &&
+              !isError &&
+              dataGetBeneficiaryPdfFiles &&
+              Object.keys(holeritesByYear).map((year) => (
+                <div key={year}>
+                  <h2 className="mb-2 text-3xl font-bold">{year}</h2>
+                  <div className="grid gap-4 grid-cols-1 sm:grid-cols-4">
+                    {holeritesByYear[year]
+                      .filter((item) => item !== null && item !== undefined)
+                      .sort((a, b) => {
+                        const aMonth =
+                          typeof a.month === 'number' ? a.month - 1 : 0
+                        const bMonth =
+                          typeof b.month === 'number' ? b.month - 1 : 0
+
+                        return (
+                          new Date(b.year, bMonth).getTime() -
+                          new Date(a.year, aMonth).getTime()
+                        )
+                      })
+                      .map((item) => {
+                        const monthName =
+                          item.month &&
+                          parseInt(item.month) > 0 &&
+                          parseInt(item.month) < 13
+                            ? Intl.DateTimeFormat('pt-BR', {
+                                month: 'long'
+                              }).format(
+                                new Date(item.year, parseInt(item.month) - 1)
+                              )
+                            : ''
+                        return (
+                          <a
+                            key={`${year}_${item.id}`}
+                            href={`data:application/pdf;base64,${item.file}`}
+                            download={item.fileName}
+                            rel="noreferrer"
+                            className="h-24 text-xl font-bold text-gray-800 bg-gray-200 rounded-md cursor-pointer hover:bg-secondary hover:text-gray-50 flex justify-center items-center whitespace-nowrap"
+                          >
+                            <span className="flex items-center">
+                              {monthName}
+                            </span>
+                          </a>
+                        )
+                      })}
+                  </div>
+                </div>
+              ))}
+          </Tabs.Content>
+          <Tabs.Content
+            className={clsx('rounded-b-lg bg-white px-6 py-4')}
             value="informes-de-rendimento"
           >
-            Informes de Rendimento
-          </Tabs.Trigger>
-        </Tabs.List>
-        <Tabs.Content
-          className={clsx('rounded-b-lg bg-white px-6 py-4')}
-          value="holerites"
-        >
-          {!isLoading &&
-            !isError &&
-            dataGetBeneficiaryPdfFiles &&
-            Object.keys(holeritesByYear).map((year) => (
-              <div key={year}>
-                <h2 className="mb-2 text-3xl font-bold">{year}</h2>
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-4">
-                  {holeritesByYear[year]
-                    .filter((item) => item !== null && item !== undefined)
-                    .sort((a, b) => {
-                      const aMonth =
-                        typeof a.month === 'number' ? a.month - 1 : 0
-                      const bMonth =
-                        typeof b.month === 'number' ? b.month - 1 : 0
-
-                      return (
-                        new Date(b.year, bMonth).getTime() -
-                        new Date(a.year, aMonth).getTime()
-                      )
-                    })
-                    .map((item) => {
-                      const monthName =
-                        item.month &&
-                        parseInt(item.month) > 0 &&
-                        parseInt(item.month) < 13
-                          ? Intl.DateTimeFormat('pt-BR', {
-                              month: 'long'
-                            }).format(
-                              new Date(item.year, parseInt(item.month) - 1)
-                            )
-                          : ''
-                      return (
+            {!isLoading &&
+              !isError &&
+              dataGetBeneficiaryPdfFiles &&
+              Object.keys(demonstrativoAnualByYear).map((year) => (
+                <div key={year}>
+                  <div className="grid gap-4 grid-cols-1 sm:grid-cols-4">
+                    {demonstrativoAnualByYear[year]
+                      .sort((a, b) => a.fileName.localeCompare(b.fileName))
+                      .map((item) => (
                         <a
                           key={`${year}_${item.id}`}
                           href={`data:application/pdf;base64,${item.file}`}
@@ -149,45 +190,18 @@ const Dashboard: NextPage = () => {
                           rel="noreferrer"
                           className="h-24 text-xl font-bold text-gray-800 bg-gray-200 rounded-md cursor-pointer hover:bg-secondary hover:text-gray-50 flex justify-center items-center whitespace-nowrap"
                         >
-                          <span className="flex items-center">{monthName}</span>
+                          <span className="flex items-center">{item.year}</span>
                         </a>
-                      )
-                    })}
+                      ))}
+                    {!demonstrativoAnualByYear[year]?.length && (
+                      <span>No data available for this year.</span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-        </Tabs.Content>
-        <Tabs.Content
-          className={clsx('rounded-b-lg bg-white px-6 py-4')}
-          value="informes-de-rendimento"
-        >
-          {!isLoading &&
-            !isError &&
-            dataGetBeneficiaryPdfFiles &&
-            Object.keys(demonstrativoAnualByYear).map((year) => (
-              <div key={year}>
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-4">
-                  {demonstrativoAnualByYear[year]
-                    .sort((a, b) => a.fileName.localeCompare(b.fileName))
-                    .map((item) => (
-                      <a
-                        key={`${year}_${item.id}`}
-                        href={`data:application/pdf;base64,${item.file}`}
-                        download={item.fileName}
-                        rel="noreferrer"
-                        className="h-24 text-xl font-bold text-gray-800 bg-gray-200 rounded-md cursor-pointer hover:bg-secondary hover:text-gray-50 flex justify-center items-center whitespace-nowrap"
-                      >
-                        <span className="flex items-center">{item.year}</span>
-                      </a>
-                    ))}
-                  {!demonstrativoAnualByYear[year]?.length && (
-                    <span>No data available for this year.</span>
-                  )}
-                </div>
-              </div>
-            ))}
-        </Tabs.Content>
-      </Tabs.Root>
+              ))}
+          </Tabs.Content>
+        </Tabs.Root>
+      )}
     </Layout>
   )
 }
