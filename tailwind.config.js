@@ -10,6 +10,15 @@ module.exports = {
   ],
   theme: {
     extend: {
+      colors: {
+        primary: '#806D56',
+        secondary: '#997D5C',
+        terciary: '#997D5C'
+      },
+      textColor: {
+        primary: '#806D56',
+        secondary: '#997D5C'
+      },
       fontSize: {
         xs: '0.9375rem', // 25% larger than .75rem
         sm: '1.09375rem', // 25% larger than .875rem

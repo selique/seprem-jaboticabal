@@ -15,7 +15,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({
 }) => {
   return (
     <main
-      className="flex flex-col items-center justify-start h-screen bg-gray-500"
+      className="flex flex-col items-center justify-start h-screen bg-primary"
       {...props}
     >
       <Head>

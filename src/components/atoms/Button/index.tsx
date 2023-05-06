@@ -29,8 +29,8 @@ const Button: React.FC<ButtonProps> = ({
           items-center
           justify-center
           text-white font-bold rounded
-          ${color === 'primary' ? 'bg-blue-600' : 'bg-gray-600'}
-          ${color === 'primary' ? 'hover:bg-blue-800' : 'hover:text-white'}
+          ${color === 'primary' ? 'bg-primary' : 'bg-gray-600'}
+          ${color === 'primary' ? 'hover:bg-secondary' : 'hover:text-white'}
           ${color === 'secondary' ? 'bg-gray-600' : 'text-white'}
           ${color === 'secondary' ? 'hover:bg-gray-800' : 'hover:text-white'}
           ${className}
@@ -46,8 +46,8 @@ const Button: React.FC<ButtonProps> = ({
         type={type}
         className={`
         text-white font-bold rounded min-h-[50px]
-          ${color === 'primary' ? 'bg-blue-600' : 'bg-gray-600'}
-          ${color === 'primary' ? 'hover:bg-blue-800' : 'hover:text-white'}
+          ${color === 'primary' ? 'bg-primary' : 'bg-gray-600'}
+          ${color === 'primary' ? 'hover:bg-secondary' : 'hover:text-white'}
           ${color === 'secondary' ? 'bg-gray-600' : 'text-white'}
           ${color === 'secondary' ? 'hover:bg-gray-800' : 'hover:text-white'}
         `}

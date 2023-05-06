@@ -10,7 +10,11 @@ export const Layout: React.FC<LayoutProps> = ({ ...props }) => {
 
   return (
     <div className="min-h-screen bg-base-200 flex flex-col" {...props}>
-      <header className="navbar bg-red-100">
+      <header
+        className="navbar 
+          bg-gradient-to-bl from-stone-200 via-stone-300 to-stone-400
+          shadow-lg"
+      >
         <section className="navbar-section flex items-center justify-between mx-10">
           <a href="#" className="navbar-brand mr-2">
             <Image
