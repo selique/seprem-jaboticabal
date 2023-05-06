@@ -28,6 +28,14 @@ const Dashboard: NextPage = () => {
             (item.month !== null ? true : item.year)
         ) || []
 
+      filteredFiles.sort((a, b) => {
+        const aMonth = a.month ? parseInt(a.month) : 1
+        const bMonth = b.month ? parseInt(b.month) : 1
+        const aDate = new Date(a.year, aMonth - 1)
+        const bDate = new Date(b.year, bMonth - 1)
+        return aDate.getTime() - bDate.getTime()
+      })
+
       return filteredFiles.reduce<Record<string, BeneficiaryPdfFile[]>>(
         (acc, item) => {
           const year = new Date(+item.year, 0).getFullYear().toString()
