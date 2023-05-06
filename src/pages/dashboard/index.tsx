@@ -28,6 +28,14 @@ const Dashboard: NextPage = () => {
             (item.month !== null ? true : item.year)
         ) || []
 
+      filteredFiles.sort((a, b) => {
+        const aMonth = a.month ? parseInt(a.month) : 1
+        const bMonth = b.month ? parseInt(b.month) : 1
+        const aDate = new Date(a.year, aMonth - 1)
+        const bDate = new Date(b.year, bMonth - 1)
+        return aDate.getTime() - bDate.getTime()
+      })
+
       return filteredFiles.reduce<Record<string, BeneficiaryPdfFile[]>>(
         (acc, item) => {
           const year = new Date(+item.year, 0).getFullYear().toString()
@@ -120,24 +128,27 @@ const Dashboard: NextPage = () => {
                   {holeritesByYear[year]
                     .filter((item) => item !== null && item !== undefined)
                     .sort((a, b) => {
-                      const aMonth = a.month ?? 0
-                      const bMonth = b.month ?? 0
+                      const aMonth =
+                        typeof a.month === 'number' ? a.month - 1 : 0
+                      const bMonth =
+                        typeof b.month === 'number' ? b.month - 1 : 0
+
                       return (
-                        new Date(b.year, (bMonth as any) - 1).getTime() -
-                        new Date(a.year, (aMonth as any) - 1).getTime()
+                        new Date(b.year, bMonth).getTime() -
+                        new Date(a.year, aMonth).getTime()
                       )
                     })
                     .map((item) => {
-                      const monthName = item.month
-                        ? Intl.DateTimeFormat('pt-BR', {
-                            month: 'long'
-                          }).format(
-                            new Date(
-                              item.year,
-                              (item.month as unknown as number) - 1
+                      const monthName =
+                        item.month &&
+                        parseInt(item.month) > 0 &&
+                        parseInt(item.month) < 13
+                          ? Intl.DateTimeFormat('pt-BR', {
+                              month: 'long'
+                            }).format(
+                              new Date(item.year, parseInt(item.month) - 1)
                             )
-                          )
-                        : ''
+                          : ''
                       return (
                         <a
                           key={`${year}_${item.id}`}
