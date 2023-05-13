@@ -157,7 +157,7 @@ const Dashboard: NextPage = () => {
                                       parseInt(item.month) - 1
                                     )
                                   )
-                                : ''
+                                : '13º Salário'
                             return (
                               <a
                                 key={`${year}_${item.id}`}
