@@ -16,8 +16,7 @@ const Collapsible = ({ title, children }: CollapsibleProps) => {
       <CollapsiblePrimitive.Trigger
         className={clsx(
           'group flex w-full select-none items-center justify-between rounded-md px-8 py-4 text-left text-3xl font-bold',
-          'bg-secondary hover:bg-primary text-gray-50 hover:text-white',
-          'focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75'
+          'bg-secondary hover:bg-primary text-gray-50 hover:text-white'
         )}
       >
         <h2 className="mb-2 text-3xl font-bold">{title}</h2>
