@@ -96,7 +96,7 @@ const Dashboard: NextPage = () => {
               className={clsx(
                 'group',
                 'rounded-lg',
-                'radix-state-active:bg-secondary radix-state-active:text-gray-50 text-lg font-medium focus-visible:radix-state-active:border-b-transparent radix-state-inactive:bg-gray-200',
+                'font-bold radix-state-active:bg-secondary radix-state-active:text-gray-50 text-lg focus-visible:radix-state-active:border-b-transparent radix-state-inactive:bg-gray-200',
                 'flex-1 p-4 mr-2',
                 'focus:radix-state-active:border-b-red'
               )}
@@ -109,7 +109,7 @@ const Dashboard: NextPage = () => {
               className={clsx(
                 'group',
                 'rounded-lg',
-                'radix-state-active:bg-secondary radix-state-active:text-gray-50 text-lg font-medium focus-visible:radix-state-active:border-b-transparent radix-state-inactive:bg-gray-200',
+                'font-bold radix-state-active:bg-secondary radix-state-active:text-gray-50 text-lg focus-visible:radix-state-active:border-b-transparent radix-state-inactive:bg-gray-200',
                 'flex-1 p-4 ml-2',
                 'focus:radix-state-active:border-b-red'
               )}
@@ -119,95 +119,93 @@ const Dashboard: NextPage = () => {
             </Tabs.Trigger>
           </Tabs.List>
           <Tabs.Content
-            className={clsx('rounded-b-lg bg-white px-6 py-4')}
+            className={clsx('rounded-b-lg bg-white py-4')}
             value="holerites"
           >
-            {!isLoading &&
+            {(!isLoading &&
               !isError &&
               dataGetBeneficiaryPdfFiles &&
               Object.keys(holeritesByYear)
                 .reverse()
                 .map((year) => (
-                  <div key={year}>
-                    <Collapsible title={year}>
-                      <div className="grid gap-4 grid-cols-1 sm:grid-cols-4">
-                        {holeritesByYear[year]
-                          .filter((item) => item !== null && item !== undefined)
-                          .sort((a, b) => {
-                            const aMonth =
-                              typeof a.month === 'number' ? a.month - 1 : 0
-                            const bMonth =
-                              typeof b.month === 'number' ? b.month - 1 : 0
+                  <Collapsible title={year} key={year}>
+                    <div className="grid gap-4 grid-cols-1 sm:grid-cols-4">
+                      {holeritesByYear[year]
+                        .filter((item) => item !== null && item !== undefined)
+                        .sort((a, b) => {
+                          const aMonth =
+                            typeof a.month === 'number' ? a.month - 1 : 0
+                          const bMonth =
+                            typeof b.month === 'number' ? b.month - 1 : 0
 
-                            return (
-                              new Date(b.year, bMonth).getTime() -
-                              new Date(a.year, aMonth).getTime()
-                            )
-                          })
-                          .map((item) => {
-                            const monthName =
-                              item.month &&
-                              parseInt(item.month) > 0 &&
-                              parseInt(item.month) < 13
-                                ? Intl.DateTimeFormat('pt-BR', {
-                                    month: 'long'
-                                  }).format(
-                                    new Date(
-                                      item.year,
-                                      parseInt(item.month) - 1
-                                    )
-                                  )
-                                : '13º Salário'
-                            return (
-                              <a
-                                key={`${year}_${item.id}`}
-                                href={`data:application/pdf;base64,${item.file}`}
-                                download={item.fileName}
-                                rel="noreferrer"
-                                className="h-24 text-xl font-bold text-gray-800 bg-gray-200 rounded-md cursor-pointer hover:bg-secondary hover:text-gray-50 flex justify-center items-center whitespace-nowrap"
-                              >
-                                <span className="flex items-center">
-                                  {monthName}
-                                </span>
-                              </a>
-                            )
-                          })}
-                      </div>
-                    </Collapsible>
-                  </div>
-                ))}
+                          return (
+                            new Date(b.year, bMonth).getTime() -
+                            new Date(a.year, aMonth).getTime()
+                          )
+                        })
+                        .map((item) => {
+                          const monthName =
+                            item.month &&
+                            parseInt(item.month) > 0 &&
+                            parseInt(item.month) < 13
+                              ? Intl.DateTimeFormat('pt-BR', {
+                                  month: 'long'
+                                }).format(
+                                  new Date(item.year, parseInt(item.month) - 1)
+                                )
+                              : '13º Salário'
+                          return (
+                            <a
+                              key={`${year}_${item.id}`}
+                              href={`data:application/pdf;base64,${item.file}`}
+                              download={item.fileName}
+                              rel="noreferrer"
+                              className="h-24 text-xl font-bold text-gray-800 bg-gray-200 rounded-md cursor-pointer hover:bg-secondary hover:text-gray-50 flex justify-center items-center whitespace-nowrap"
+                            >
+                              <span className="flex items-center">
+                                {monthName}
+                              </span>
+                            </a>
+                          )
+                        })}
+                    </div>
+                  </Collapsible>
+                ))) ?? (
+              <span className="text-xl font-bold">
+                Não há holerites disponiveis ainda.
+              </span>
+            )}
           </Tabs.Content>
           <Tabs.Content
-            className={clsx('rounded-b-lg bg-white px-6 py-4')}
+            className={clsx('rounded-b-lg bg-white py-4')}
             value="informes-de-rendimento"
           >
-            {!isLoading &&
-              !isError &&
-              dataGetBeneficiaryPdfFiles &&
-              Object.keys(demonstrativoAnualByYear).map((year) => (
-                <div key={year}>
-                  <div className="grid gap-4 grid-cols-1 sm:grid-cols-4">
-                    {demonstrativoAnualByYear[year]
-                      .sort((a, b) => a.fileName.localeCompare(b.fileName))
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-4">
+              {(!isLoading &&
+                !isError &&
+                dataGetBeneficiaryPdfFiles &&
+                Object.keys(demonstrativoAnualByYear).map((year) =>
+                  demonstrativoAnualByYear[year]
+                    .sort((a, b) => a.fileName.localeCompare(b.fileName))
 
-                      .map((item) => (
-                        <a
-                          key={`${year}_${item.id}`}
-                          href={`data:application/pdf;base64,${item.file}`}
-                          download={item.fileName}
-                          rel="noreferrer"
-                          className="h-24 text-xl font-bold text-gray-800 bg-gray-200 rounded-md cursor-pointer hover:bg-secondary hover:text-gray-50 flex justify-center items-center whitespace-nowrap"
-                        >
-                          <span className="flex items-center">{item.year}</span>
-                        </a>
-                      ))
-                      .reverse()}
-                    {!demonstrativoAnualByYear[year]?.length && (
-                      <span>No data available for this year.</span>
-                    )}
-                  </div>
-                </div>
-              ))}
+                    .map((item) => (
+                      <a
+                        key={`${year}_${item.id}`}
+                        href={`data:application/pdf;base64,${item.file}`}
+                        download={item.fileName}
+                        rel="noreferrer"
+                        className="h-24 text-xl font-bold text-gray-800 bg-gray-200 rounded-md cursor-pointer hover:bg-secondary hover:text-gray-50 flex justify-center items-center whitespace-nowrap"
+                      >
+                        <span className="flex items-center">{item.year}</span>
+                      </a>
+                    ))
+                    .reverse()
+                )) ?? (
+                <span className="text-xl font-bold">
+                  Não há informes de rendimento disponiveis ainda.
+                </span>
+              )}
+            </div>
           </Tabs.Content>
         </Tabs.Root>
       )}
