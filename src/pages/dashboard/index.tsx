@@ -1,5 +1,6 @@
 import { trpc } from '@/common/trpc'
 import { IFileType } from '@/common/validation/pdf'
+import { Collapsible } from '@/components/molecules/Collapsible'
 import ResetPassword from '@/components/organisms/ResetPassword'
 import Layout from '@components/templates/layout'
 import { BeneficiaryPdfFile } from '@prisma/client'
@@ -128,47 +129,51 @@ const Dashboard: NextPage = () => {
                 .reverse()
                 .map((year) => (
                   <div key={year}>
-                    <h2 className="mb-2 text-3xl font-bold">{year}</h2>
-                    <div className="grid gap-4 grid-cols-1 sm:grid-cols-4">
-                      {holeritesByYear[year]
-                        .filter((item) => item !== null && item !== undefined)
-                        .sort((a, b) => {
-                          const aMonth =
-                            typeof a.month === 'number' ? a.month - 1 : 0
-                          const bMonth =
-                            typeof b.month === 'number' ? b.month - 1 : 0
+                    <Collapsible title={year}>
+                      <div className="grid gap-4 grid-cols-1 sm:grid-cols-4">
+                        {holeritesByYear[year]
+                          .filter((item) => item !== null && item !== undefined)
+                          .sort((a, b) => {
+                            const aMonth =
+                              typeof a.month === 'number' ? a.month - 1 : 0
+                            const bMonth =
+                              typeof b.month === 'number' ? b.month - 1 : 0
 
-                          return (
-                            new Date(b.year, bMonth).getTime() -
-                            new Date(a.year, aMonth).getTime()
-                          )
-                        })
-                        .map((item) => {
-                          const monthName =
-                            item.month &&
-                            parseInt(item.month) > 0 &&
-                            parseInt(item.month) < 13
-                              ? Intl.DateTimeFormat('pt-BR', {
-                                  month: 'long'
-                                }).format(
-                                  new Date(item.year, parseInt(item.month) - 1)
-                                )
-                              : ''
-                          return (
-                            <a
-                              key={`${year}_${item.id}`}
-                              href={`data:application/pdf;base64,${item.file}`}
-                              download={item.fileName}
-                              rel="noreferrer"
-                              className="h-24 text-xl font-bold text-gray-800 bg-gray-200 rounded-md cursor-pointer hover:bg-secondary hover:text-gray-50 flex justify-center items-center whitespace-nowrap"
-                            >
-                              <span className="flex items-center">
-                                {monthName}
-                              </span>
-                            </a>
-                          )
-                        })}
-                    </div>
+                            return (
+                              new Date(b.year, bMonth).getTime() -
+                              new Date(a.year, aMonth).getTime()
+                            )
+                          })
+                          .map((item) => {
+                            const monthName =
+                              item.month &&
+                              parseInt(item.month) > 0 &&
+                              parseInt(item.month) < 13
+                                ? Intl.DateTimeFormat('pt-BR', {
+                                    month: 'long'
+                                  }).format(
+                                    new Date(
+                                      item.year,
+                                      parseInt(item.month) - 1
+                                    )
+                                  )
+                                : ''
+                            return (
+                              <a
+                                key={`${year}_${item.id}`}
+                                href={`data:application/pdf;base64,${item.file}`}
+                                download={item.fileName}
+                                rel="noreferrer"
+                                className="h-24 text-xl font-bold text-gray-800 bg-gray-200 rounded-md cursor-pointer hover:bg-secondary hover:text-gray-50 flex justify-center items-center whitespace-nowrap"
+                              >
+                                <span className="flex items-center">
+                                  {monthName}
+                                </span>
+                              </a>
+                            )
+                          })}
+                      </div>
+                    </Collapsible>
                   </div>
                 ))}
           </Tabs.Content>
