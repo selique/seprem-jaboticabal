@@ -38,6 +38,7 @@ const UploadPdf: NextPage = () => {
   const [processedCountTotal, setProcessedCountTotal] = useState(0)
   const [uploadLog, setUploadLog] = useState<UploadLogItem[]>([])
   const [overwriteState, setOverwriteState] = useState(false)
+  const [numberPages, setNumberPages] = useState(1)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFile(e.target.files?.[0] || null)
@@ -169,11 +170,11 @@ const UploadPdf: NextPage = () => {
 
     try {
       const res = await fetch(
-        `https://seprem-back-end.fly.dev/${
+        `http://localhost:8080/${
           fileType === 'HOLERITE'
             ? 'holerites'
             : 'DEMOSTRATIVO_ANUAL' && 'declaracao-anual'
-        }`,
+        }?numberPages=${numberPages}`,
         {
           method: 'POST',
           body: formData,
@@ -245,17 +246,33 @@ const UploadPdf: NextPage = () => {
         className="flex flex-col items-center justify-center min-h-screen"
       >
         <div className="flex flex-col items-center justify-center space-y-4">
-          <label htmlFor="pdf" className="text-lg font-medium">
-            Selecione tipo do arquivo PDF
-          </label>
-          <select
-            value={fileType}
-            onChange={(e) => setFileType(e.target.value as IFileType)}
-            className="block w-full px-4 py-2 text-base border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          >
-            <option value="HOLERITE">Holerite</option>
-            <option value="DEMOSTRATIVO_ANUAL">Demonstrativo Anual</option>
-          </select>
+          <div className="flex flex-col items-end space-y-4">
+            <div className="flex flex-row items-start">
+              <label htmlFor="pdf" className="text-lg font-medium">
+                Selecione tipo do arquivo PDF
+              </label>
+              <select
+                value={fileType}
+                onChange={(e) => setFileType(e.target.value as IFileType)}
+                className="block w-56 px-4 py-2  mx-4 text-base border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              >
+                <option value="HOLERITE">Holerite</option>
+                <option value="DEMOSTRATIVO_ANUAL">Demonstrativo Anual</option>
+              </select>
+            </div>
+            <div className="flex flex-row items-start">
+              <label htmlFor="pdf" className="text-lg font-medium">
+                Selecione o intervalo de paginas do arquivo PDF
+              </label>
+              <input
+                type="number"
+                value={numberPages}
+                onChange={(e) => setNumberPages(Number(e.target.value))}
+                className="block w-56 px-4 py-2  mx-4 text-base border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                min="1"
+              />
+            </div>
+          </div>
           <div className="flex flex-row space-x-4 border border-red-600 border-dashed p-2">
             <div className="flex items-center justify-center rounded-sm ">
               <label htmlFor="pdf" className="text-md font-medium text-red-600">
