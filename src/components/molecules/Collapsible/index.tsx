@@ -19,7 +19,7 @@ const Collapsible = ({ title, children }: CollapsibleProps) => {
           'bg-secondary hover:bg-primary text-gray-50 hover:text-white'
         )}
       >
-        <h2 className="mb-2 text-3xl font-bold">{title}</h2>
+        <h2 className="mb-2 text-xl font-bold">{title}</h2>
         <TriangleRightIcon className="gray-50 transform duration-300 ease-in-out group-radix-state-open:rotate-90 w-auto h-10" />
       </CollapsiblePrimitive.Trigger>
       <CollapsiblePrimitive.Content className="my-2 flex flex-col space-y-10">

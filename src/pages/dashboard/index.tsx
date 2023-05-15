@@ -10,6 +10,8 @@ import type { NextPage } from 'next'
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import { useCallback, useMemo } from 'react'
+import Balancer from 'react-wrap-balancer'
+
 const Dashboard: NextPage = () => {
   const { data: session } = useSession()
 
@@ -144,40 +146,58 @@ const Dashboard: NextPage = () => {
                           )
                         })
                         .map((item) => {
-                          const monthName =
-                            item.month &&
-                            parseInt(item.month!) > 0 &&
-                            parseInt(item.month!) < 13
-                              ? Intl.DateTimeFormat('pt-BR', {
-                                  month: 'long'
-                                }).format(
-                                  new Date(item.year, parseInt(item.month!) - 1)
-                                )
-                              : parseInt(item.month!) === 13
-                              ? '13º Salário Integral'
-                              : parseInt(item.month!) === 14
-                              ? '13º Adiantamento'
-                              : 'Arquivo não nomeado'
+                          const month = parseInt(item.month!)
+
+                          let monthName
+                          if (month > 0 && month <= 12) {
+                            monthName = Intl.DateTimeFormat('pt-BR', {
+                              month: 'long'
+                            }).format(new Date(item.year, month - 1))
+                          } else if (
+                            month === 13 &&
+                            holeritesByYear[year].some(
+                              (i) => parseInt(i.month!) === 14
+                            )
+                          ) {
+                            monthName = '13º primeira parcela'
+                          } else if (
+                            month === 14 &&
+                            holeritesByYear[year].some(
+                              (i) => parseInt(i.month!) === 13
+                            )
+                          ) {
+                            monthName = '13º segunda parcela'
+                          } else if (month === 13) {
+                            monthName = '13º Integral'
+                          } else {
+                            monthName = 'Arquivo não nomeado'
+                          }
+
                           return (
                             <a
                               key={`${year}_${item.id}`}
                               href={`data:application/pdf;base64,${item.file}`}
                               download={item.fileName}
                               rel="noreferrer"
-                              className="h-24 text-xl font-bold text-gray-800 bg-gray-200 rounded-md cursor-pointer hover:bg-secondary hover:text-gray-50 flex justify-center items-center whitespace-nowrap"
+                              className={clsx(
+                                parseInt(item.month!) >= 13
+                                  ? 'sm:col-span-2'
+                                  : 'col-span-1',
+                                'h-24 text-lg font-bold text-gray-800 bg-gray-200 rounded-md cursor-pointer hover:bg-secondary hover:text-gray-50 flex justify-center items-center whitespace-nowrap'
+                              )}
                             >
-                              <span className="flex items-center">
+                              <Balancer className="flex items-center">
                                 {monthName}
-                              </span>
+                              </Balancer>
                             </a>
                           )
                         })}
                     </div>
                   </Collapsible>
                 ))) ?? (
-              <span className="text-xl font-bold">
+              <Balancer className="text-lg font-bold">
                 Não há holerites disponiveis ainda.
-              </span>
+              </Balancer>
             )}
           </Tabs.Content>
           <Tabs.Content
@@ -198,16 +218,18 @@ const Dashboard: NextPage = () => {
                         href={`data:application/pdf;base64,${item.file}`}
                         download={item.fileName}
                         rel="noreferrer"
-                        className="h-24 text-xl font-bold text-gray-800 bg-gray-200 rounded-md cursor-pointer hover:bg-secondary hover:text-gray-50 flex justify-center items-center whitespace-nowrap"
+                        className="h-24 text-lg font-bold text-gray-800 bg-gray-200 rounded-md cursor-pointer hover:bg-secondary hover:text-gray-50 flex justify-center items-center whitespace-nowrap"
                       >
-                        <span className="flex items-center">{item.year}</span>
+                        <Balancer className="flex items-center">
+                          {item.year}
+                        </Balancer>
                       </a>
                     ))
                     .reverse()
                 )) ?? (
-                <span className="text-xl font-bold">
+                <Balancer className="text-lg font-bold">
                   Não há informes de rendimento disponiveis ainda.
-                </span>
+                </Balancer>
               )}
             </div>
           </Tabs.Content>
