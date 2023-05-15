@@ -146,14 +146,18 @@ const Dashboard: NextPage = () => {
                         .map((item) => {
                           const monthName =
                             item.month &&
-                            parseInt(item.month) > 0 &&
-                            parseInt(item.month) < 13
+                            parseInt(item.month!) > 0 &&
+                            parseInt(item.month!) < 13
                               ? Intl.DateTimeFormat('pt-BR', {
                                   month: 'long'
                                 }).format(
-                                  new Date(item.year, parseInt(item.month) - 1)
+                                  new Date(item.year, parseInt(item.month!) - 1)
                                 )
-                              : '13º Salário'
+                              : parseInt(item.month!) === 13
+                              ? '13º Salário Integral'
+                              : parseInt(item.month!) === 14
+                              ? '13º Adiantamento'
+                              : 'Arquivo não nomeado'
                           return (
                             <a
                               key={`${year}_${item.id}`}

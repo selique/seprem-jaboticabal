@@ -170,7 +170,7 @@ const UploadPdf: NextPage = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:8080/${
+        `https://seprem-back-end.fly.dev/${
           fileType === 'HOLERITE'
             ? 'holerites'
             : 'DEMOSTRATIVO_ANUAL' && 'declaracao-anual'
