@@ -10,11 +10,9 @@ export const Layout: React.FC<LayoutProps> = ({ ...props }) => {
   const { data: session } = useSession()
 
   return (
-    <div className="min-h-screen bg-base-200 " {...props}>
+    <div className="min-h-screen bg-base-200" {...props}>
       <header
-        className="navbar 
-          bg-gradient-to-bl from-stone-200 via-stone-300 to-stone-400
-          shadow-lg"
+        className="navbar bg-gradient-to-bl from-stone-200 via-stone-300 to-stone-400 shadow-lg z-50"
       >
         <section className="navbar-section flex items-center justify-between mx-2 sm:mx-10">
           
