@@ -15,6 +15,12 @@ import Balancer from 'react-wrap-balancer'
 const Dashboard: NextPage = () => {
   const { data: session } = useSession()
 
+  const extractEnrollmentId = (filename: string): string | null => {
+    const regex = /(\d{5})/i
+    const match = regex.exec(filename)
+    return match ? match[1] : null
+  }
+
   const {
     data: dataGetBeneficiaryPdfFiles,
     isLoading,
@@ -145,8 +151,12 @@ const Dashboard: NextPage = () => {
                             new Date(a.year, aMonth).getTime()
                           )
                         })
-                        .map((item) => {
+
+                        .map((item, index, array) => {
                           const month = parseInt(item.month!)
+                          const enrollmentId = String(
+                            extractEnrollmentId(item.fileName)
+                          )
 
                           let monthName
                           if (month > 0 && month <= 12) {
@@ -172,6 +182,10 @@ const Dashboard: NextPage = () => {
                           } else {
                             monthName = 'Arquivo não nomeado'
                           }
+                          // Check if there are two months with the same value
+                          const isDuplicateMonth =
+                            array.filter((i) => parseInt(i.month!) === month)
+                              .length > 1
 
                           return (
                             <a
@@ -187,7 +201,17 @@ const Dashboard: NextPage = () => {
                               )}
                             >
                               <Balancer className="flex items-center">
-                                {monthName}
+                                {isDuplicateMonth ? (
+                                  <>
+                                    {monthName}
+                                    <br />
+                                    <small className="ml-2">
+                                      Matrícula: {enrollmentId}
+                                    </small>
+                                  </>
+                                ) : (
+                                  monthName
+                                )}
                               </Balancer>
                             </a>
                           )
@@ -196,7 +220,7 @@ const Dashboard: NextPage = () => {
                   </Collapsible>
                 ))) ?? (
               <Balancer className="text-lg font-bold">
-                Não há holerites disponiveis ainda.
+                Não há holerites disponíveis ainda.
               </Balancer>
             )}
           </Tabs.Content>
