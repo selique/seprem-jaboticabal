@@ -170,7 +170,7 @@ const UploadPdf: NextPage = () => {
 
     try {
       const res = await fetch(
-        `https://seprem-back-end.fly.dev/${
+        `https://admin-back-end-jyvv-dev.fl0.io/${
           fileType === 'HOLERITE'
             ? 'holerites'
             : 'DEMOSTRATIVO_ANUAL' && 'declaracao-anual'
@@ -225,22 +225,22 @@ const UploadPdf: NextPage = () => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'UPLOADING':
-        return <FaSpinner className="text-blue-500 animate-spin mr-2" />
+        return <FaSpinner className="mr-2 text-blue-500 animate-spin" />
       case 'SUCCESS':
-        return <FaCheckCircle className="text-green-500 mr-2" />
+        return <FaCheckCircle className="mr-2 text-green-500" />
       case 'DUPLICATE':
-        return <FaExclamationTriangle className="text-yellow-500 mr-2" />
+        return <FaExclamationTriangle className="mr-2 text-yellow-500" />
       case 'OVERWRITE':
-        return <FaPen className="text-violet-500 mr-2" />
+        return <FaPen className="mr-2 text-violet-500" />
       case 'FAILED':
-        return <FaTimesCircle className="text-red-500 mr-2" />
+        return <FaTimesCircle className="mr-2 text-red-500" />
       default:
         return <span></span>
     }
   }
 
   return (
-    <main className=" bg-gray-100">
+    <main className="bg-gray-100 ">
       <form
         onSubmit={handleSubmit}
         className="flex flex-col items-center justify-center min-h-screen"
@@ -254,7 +254,7 @@ const UploadPdf: NextPage = () => {
               <select
                 value={fileType}
                 onChange={(e) => setFileType(e.target.value as IFileType)}
-                className="block w-56 px-4 py-2  mx-4 text-base border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="block w-56 px-4 py-2 mx-4 text-base border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               >
                 <option value="HOLERITE">Holerite</option>
                 <option value="DEMOSTRATIVO_ANUAL">Demonstrativo Anual</option>
@@ -268,24 +268,18 @@ const UploadPdf: NextPage = () => {
                 type="number"
                 value={numberPages}
                 onChange={(e) => setNumberPages(Number(e.target.value))}
-                className="block w-56 px-4 py-2  mx-4 text-base border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="block w-56 px-4 py-2 mx-4 text-base border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 min="1"
               />
             </div>
           </div>
-          <div className="flex flex-row space-x-4 border border-red-600 border-dashed p-2">
+          <div className="flex flex-row p-2 space-x-4 border border-red-600 border-dashed">
             <div className="flex items-center justify-center rounded-sm ">
-              <label htmlFor="pdf" className="text-md font-medium text-red-600">
+              <label htmlFor="pdf" className="font-medium text-red-600 text-md">
                 Deseja sobrescrever arquivos existentes?&nbsp;
-                <small className="text-xs text-red-600 line-clamp-4 space-y-2">
+                <small className="space-y-2 text-xs text-red-600 line-clamp-4">
                   <br />
-                  <span
-                    className="
-                text-red-600
-                font-bold
-                text-sm
-              "
-                  >
+                  <span className="text-sm font-bold text-red-600 ">
                     ***Atenção***
                   </span>
                   <br />
@@ -296,7 +290,7 @@ const UploadPdf: NextPage = () => {
                 </small>
               </label>
             </div>
-            <div className="flex flex-col items-center justify-center space-y-2 min-w-fit h-24">
+            <div className="flex flex-col items-center justify-center h-24 space-y-2 min-w-fit">
               <small className="text-xs text-red-600 line-clamp-4">
                 <br />
                 {overwriteState ? (
@@ -313,7 +307,7 @@ const UploadPdf: NextPage = () => {
               />
             </div>
           </div>
-          <div className="flex flex-row items-center justify-between w-fit space-x-4">
+          <div className="flex flex-row items-center justify-between space-x-4 w-fit">
             <label
               htmlFor="pdf"
               className={`px-4 py-2 text-lg font-medium text-white rounded-md cursor-pointer  ${
@@ -340,14 +334,14 @@ const UploadPdf: NextPage = () => {
                 disabled={isUploading}
               >
                 {isUploading ? (
-                  <FaSpinner className="animate-spin mr-auto" />
+                  <FaSpinner className="mr-auto animate-spin" />
                 ) : (
                   'Enviar'
                 )}
               </button>
             ) : null}
           </div>
-          <div className="flex justify-center text-gray-500 text-sm mb-4">
+          <div className="flex justify-center mb-4 text-sm text-gray-500">
             <div className="flex items-center mr-4">
               <FaCheckCircle className="mr-2 text-blue-500" />
               <span>Uploading {processedCountTotal - processedCount}</span>

@@ -188,32 +188,34 @@ const Dashboard: NextPage = () => {
                               .length > 1
 
                           return (
-                            <a
-                              key={`${year}_${item.id}`}
-                              href={`data:application/pdf;base64,${item.file}`}
-                              download={item.fileName}
-                              rel="noreferrer"
-                              className={clsx(
-                                parseInt(item.month!) >= 13
-                                  ? 'sm:col-span-2'
-                                  : 'col-span-1',
-                                'h-24 text-lg font-bold text-gray-800 bg-gray-200 rounded-md cursor-pointer hover:bg-secondary hover:text-gray-50 flex justify-center items-center whitespace-nowrap'
-                              )}
-                            >
-                              <Balancer className="flex items-center">
-                                {isDuplicateMonth ? (
-                                  <>
-                                    {monthName}
-                                    <br />
-                                    <small className="ml-2">
-                                      Matrícula: {enrollmentId}
-                                    </small>
-                                  </>
-                                ) : (
-                                  monthName
+                            <>
+                              <a
+                                key={`${year}_${item.id}`}
+                                href={`data:application/pdf;base64,${item.file}`}
+                                download={item.fileName}
+                                rel="noreferrer"
+                                className={clsx(
+                                  parseInt(item.month!) >= 13
+                                    ? 'sm:col-span-2'
+                                    : 'col-span-1',
+                                  'h-24 text-lg font-bold text-gray-800 bg-gray-200 rounded-md cursor-pointer hover:bg-secondary hover:text-gray-50 flex justify-center items-center whitespace-nowrap'
                                 )}
-                              </Balancer>
-                            </a>
+                              >
+                                <Balancer className="flex items-center">
+                                  {isDuplicateMonth ? (
+                                    <>
+                                      {monthName}
+                                      <br />
+                                      <small className="ml-2">
+                                        Matrícula: {enrollmentId}
+                                      </small>
+                                    </>
+                                  ) : (
+                                    monthName
+                                  )}
+                                </Balancer>
+                              </a>
+                            </>
                           )
                         })}
                     </div>
