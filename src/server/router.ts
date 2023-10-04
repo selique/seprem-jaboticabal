@@ -132,25 +132,38 @@ export const serverRouter = t.router({
     .query(async ({ input, ctx }) => {
       const { cpf } = input
 
-      // Verify that the user is authorized to perform this action
-      // const isAdmin = await ctx.prisma.adminUser.findFirst({
-      //   where: { email: (ctx.session as any)?.user?.email ?? '' },
+      try {
+        // Verify that the user is authorized to perform this action
+        // const isAdmin = await ctx.prisma.adminUser.findFirst({
+        //   where: { email: (ctx.session as any)?.user?.email ?? '' },
       // })
       // if (!isAdmin) {
       //   throw new TRPCError({
       //     code: 'UNAUTHORIZED',
-      //     message: 'You are not authorized to perform this action',
-      //   })
-      // }
+        //     message: 'You are not authorized to perform this action',
+        //   })
+        // }
+        console.log(input, ctx?.session?.user ?? 'nao tem user')
 
-      const pdfFiles = await ctx.prisma.beneficiaryPdfFile.findMany({
-        where: { cpf }
-      })
+        const pdfFiles = await ctx.prisma.beneficiaryPdfFile.findMany({
+          where: { cpf }
+        })
+        console.log(pdfFiles)
 
-      return {
-        status: 200,
-        message: 'User found successfully',
-        result: pdfFiles
+        return {
+          status: 200,
+          message: 'User found successfully',
+          result: pdfFiles
+        }
+      } catch (error) {
+        // Handle the error gracefully and provide an appropriate response
+        console.error('Error in getBeneficiaryPdfFiles:', error)
+
+        // You can customize the error message and code as needed
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'An error occurred while fetching PDF files'
+        })
       }
     }),
   checkExistingPdfFile: t.procedure
