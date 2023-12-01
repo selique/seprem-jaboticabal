@@ -170,7 +170,7 @@ const UploadPdf: NextPage = () => {
 
     try {
       const res = await fetch(
-        `https://admin-back-end-jyvv-dev.fl0.io/${
+        `https://seprem-jaboticabal-back-end-rghe.4.us-1.fl0.io/${
           fileType === 'HOLERITE'
             ? 'holerites'
             : 'DEMOSTRATIVO_ANUAL' && 'declaracao-anual'

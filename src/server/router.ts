@@ -136,10 +136,10 @@ export const serverRouter = t.router({
         // Verify that the user is authorized to perform this action
         // const isAdmin = await ctx.prisma.adminUser.findFirst({
         //   where: { email: (ctx.session as any)?.user?.email ?? '' },
-      // })
-      // if (!isAdmin) {
-      //   throw new TRPCError({
-      //     code: 'UNAUTHORIZED',
+        // })
+        // if (!isAdmin) {
+        //   throw new TRPCError({
+        //     code: 'UNAUTHORIZED',
         //     message: 'You are not authorized to perform this action',
         //   })
         // }
