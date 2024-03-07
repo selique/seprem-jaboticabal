@@ -12,5 +12,11 @@
     "no-useless-escape": "off",
     "react/react-in-jsx-scope": "off",
     "tralling-comma": "off"
-  }
+  },
+  "prettier/prettier": [
+    "error",
+    {
+      "endOfLine": "auto"
+    }
+  ]
 }
