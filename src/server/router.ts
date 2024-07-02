@@ -84,6 +84,12 @@ export const serverRouter = t.router({
           // console.log(
           //   `PDF file ${overwrite ? 'updated' : 'created'} successfully`
           // )
+           // Execute the raw query to update CPF format
+          await ctx.prisma.$executeRaw`
+            UPDATE public."BeneficiaryPdfFile"
+            SET cpf = regexp_replace(cpf, '([0-9]{3})([0-9]{3})([0-9]{3})([0-9]{2})', '\1.\2.\3-\4')
+            WHERE "fileName" !~ '^[0-9]{3}\.[0-9]{3}\.[0-9]{3}-[0-9]{2}$'
+          `;
           const typeResult = overwrite ? 200 : 201
           return {
             status: typeResult,
