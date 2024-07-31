@@ -24,37 +24,50 @@ export const serverRouter = t.router({
         .catchall(z.any())
     )
     .mutation(async ({ input, ctx }) => {
-      const {
-        cpf,
-        name,
-        enrollment,
-        fileName,
-        fileType,
-        year,
-        month,
-        file,
-        overwrite
-      } = input
+      let { cpf, name, enrollment, fileName, fileType, year, month, file, overwrite } = input;
+
+      // Format CPF with regex replacement before using it
+      const formattedCpf = cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+
+      // Extract parts from the file name and reformat the file name
+      const nameParts = fileName.split('-');
+      if (nameParts.length < 5) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'File name format is incorrect'
+        });
+      }
+
+      // Replace the CPF in the file name with the formatted CPF
+      const newFileName = `${formattedCpf}-${nameParts.slice(1).join('-')}`;
+
+      // Ensure the file name starts with the formatted CPF
+      if (!newFileName.startsWith(formattedCpf)) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'File name does not start with formatted CPF'
+        });
+      }
 
       // Create the user if it does not exist only if the file type is HOLERITE
       // DEMOSTRATIVO_ANUAL not has field enrollment to map for creation of user
       if (fileType === 'HOLERITE' && enrollment) {
         const beneficiaryExists = await ctx.prisma.beneficiaryUser.findFirst({
-          where: { cpf }
-        })
+          where: { cpf: formattedCpf }
+        });
 
         if (!beneficiaryExists) {
-          const enrollmentStr = enrollment?.toString()
-          const hashedPassword = await hash(enrollmentStr)
+          const enrollmentStr = enrollment.toString();
+          const hashedPassword = await hash(enrollmentStr);
 
           const result = await ctx.prisma.beneficiaryUser.create({
             data: {
-              cpf,
+              cpf: formattedCpf,
               password: hashedPassword,
               name,
               enrollment
             }
-          })
+          });
 
           if (result) {
             console.log('User created successfully')
@@ -67,70 +80,52 @@ export const serverRouter = t.router({
         }
       }
 
-      // Create the PDF file in the database
+      // Create or update the PDF file in the database
       const createFilePdfBeneficiary = async (_fileType: IFileType) => {
         const createFilePDF = await ctx.prisma.beneficiaryPdfFile.create({
           data: {
-            cpf,
-            fileName,
+            cpf: formattedCpf,
+            fileName: newFileName,
             fileType: _fileType,
             year,
             month: _fileType === 'HOLERITE' ? month : null,
             file
           }
-        })
+        });
 
         if (createFilePDF) {
-          // console.log(
-          //   `PDF file ${overwrite ? 'updated' : 'created'} successfully`
-          // )
-           // Execute the raw query to update CPF format
-          await ctx.prisma.$executeRaw`
-            UPDATE public."BeneficiaryPdfFile"
-            SET cpf = regexp_replace(cpf, '([0-9]{3})([0-9]{3})([0-9]{3})([0-9]{2})', '\1.\2.\3-\4')
-            WHERE "fileName" !~ '^[0-9]{3}\.[0-9]{3}\.[0-9]{3}-[0-9]{2}$'
-          `;
-          const typeResult = overwrite ? 200 : 201
+          const typeResult = overwrite ? 200 : 201;
           return {
             status: typeResult,
             message: `PDF file ${overwrite ? 'updated' : 'created'}`,
-            result: fileName
-          }
+            result: newFileName
+          };
         } else {
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: 'An error occurred while creating the PDF file'
-          })
+          });
         }
-      }
+      };
 
       // Check if the file name already exists in the database
       const fileExists = await ctx.prisma.beneficiaryPdfFile.findFirst({
-        where: { fileName }
-      })
+        where: { fileName: newFileName }
+      });
 
       if (fileExists && !overwrite) {
         return {
           status: 409,
           message: 'File already exists.',
-          result: fileName
-        }
+          result: newFileName
+        };
       } else if (fileExists && overwrite) {
-        const result = await ctx.prisma.beneficiaryPdfFile.deleteMany({
-          where: { fileName }
-        })
-        if (result) {
-          const result = await createFilePdfBeneficiary(fileType)
-          return result
-        } else {
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'An error occurred while deleting the PDF file'
-          })
-        }
+        await ctx.prisma.beneficiaryPdfFile.deleteMany({
+          where: { fileName: newFileName }
+        });
+        return await createFilePdfBeneficiary(fileType);
       } else {
-        const result = await createFilePdfBeneficiary(fileType)
-        return result
+        return await createFilePdfBeneficiary(fileType);
       }
     }),
   getBeneficiaryPdfFiles: t.procedure
