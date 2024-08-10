@@ -329,7 +329,7 @@ const UploadPdf: NextPage = () => {
                        {index >= 0 && (
                       <span>Arquivos processado: {currentFileProcessed} de {index}</span>
                        )}
-                      <div key={index} className="flex flex-col w-full mb-2 file-item">
+                      <div key={item.name + index} className="flex flex-col w-full mb-2 file-item">
                         <div className="flex items-center space-x-2">
                           {/* File Icon */}
                           <FaFilePdf className="text-red-500" />
@@ -445,7 +445,7 @@ const UploadPdf: NextPage = () => {
     <div className="grid w-full grid-cols-1 gap-4 mt-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {[...uploadLog].reverse().map((item, index) => (
         <div
-          key={index}
+        key={item.name + index}
           className={`flex items-center p-4 rounded-lg animate-in fade-in zoom-in 
             ${item.status === 'UPLOADING'
               ? 'bg-blue-300 text-blue-700'
