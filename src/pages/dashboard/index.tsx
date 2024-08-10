@@ -81,7 +81,7 @@ const Dashboard: NextPage = () => {
       {isLoading ? (
         <div className="flex flex-col items-center justify-center w-full h-full">
           <Image
-            className="animate-bounce w-1/3"
+            className="w-1/3 animate-bounce"
             src="/seprem-logo.png"
             alt="SEPREM"
             width={200}
@@ -89,7 +89,7 @@ const Dashboard: NextPage = () => {
           />
         </div>
       ) : isError ? (
-        <p className="leading-loose text-center text-primary text-lg">
+        <p className="text-lg leading-loose text-center text-primary">
           Ocorreu um erro ao carregar os dados, atualize a página ou tente mais
           tarde.
         </p>
@@ -137,7 +137,7 @@ const Dashboard: NextPage = () => {
                 .reverse()
                 .map((year) => (
                   <Collapsible title={year} key={year}>
-                    <div className="grid gap-4 grid-cols-1 sm:grid-cols-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
                       {holeritesByYear[year]
                         .filter((item) => item !== null && item !== undefined)
                         .sort((a, b) => {
@@ -230,7 +230,7 @@ const Dashboard: NextPage = () => {
             className={clsx('rounded-b-lg bg-white py-4')}
             value="informes-de-rendimento"
           >
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
               {(!isLoading &&
                 !isError &&
                 dataGetBeneficiaryPdfFiles &&
@@ -244,7 +244,7 @@ const Dashboard: NextPage = () => {
                         href={`data:application/pdf;base64,${item.file}`}
                         download={item.fileName}
                         rel="noreferrer"
-                        className="h-24 text-lg font-bold text-gray-800 bg-gray-200 rounded-md cursor-pointer hover:bg-secondary hover:text-gray-50 flex justify-center items-center whitespace-nowrap"
+                        className="flex items-center justify-center h-24 text-lg font-bold text-gray-800 bg-gray-200 rounded-md cursor-pointer hover:bg-secondary hover:text-gray-50 whitespace-nowrap"
                       >
                         <Balancer className="flex items-center">
                           {item.year}
