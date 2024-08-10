@@ -5,8 +5,7 @@ import { NextPage } from 'next'
 import { useState } from 'react'
 import {
   FaCheckCircle,
-  FaExclamationTriangle,
-  FaPen,
+  FaExclamationTriangle, FaFilePdf, FaPen,
   FaSpinner,
   FaTimesCircle
 } from 'react-icons/fa'
@@ -30,7 +29,7 @@ type IDemostrativoAnualWithPdf = IBeneficiaryWithPdf & {
 type BeneficiaryPdfInput = IBeneficiaryWithPdf | IDemostrativoAnualWithPdf
 
 const UploadPdf: NextPage = () => {
-  const [file, setFile] = useState<File | null>(null)
+  const [files, setFiles] = useState<File[]>([])
   const [isUploading, setIsUploading] = useState(false)
   const [fileType, setFileType] = useState<IFileType>('HOLERITE')
   const [uploadProgress, setUploadProgress] = useState<number | null>(null)
@@ -41,7 +40,7 @@ const UploadPdf: NextPage = () => {
   const [numberPages, setNumberPages] = useState(1)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFile(e.target.files?.[0] || null)
+    setFiles(Array.from(e.target.files || []))
   }
 
   const uploadPdfMutation = trpc.uploadPdf.useMutation()
@@ -155,64 +154,67 @@ const UploadPdf: NextPage = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (!file) {
-      console.error('No file selected')
+    if (files.length === 0) {
+      console.error('No files selected')
       return
     }
 
     setIsUploading(true)
     setUploadLog([])
-    setUploadProgress(null) // reset the upload progress
-    setProcessedCountTotal(0) // reset the total count
-    setProcessedCount(0) // reset the processed count
-    const formData = new FormData()
-    formData.append('pdf', file)
+    setUploadProgress(null)
+    setProcessedCountTotal(0)
+    setProcessedCount(0)
 
     try {
-      const res = await fetch(
-        `https://sepremjaboticabalback-end-production.up.railway.app/${
-          fileType === 'HOLERITE'
-            ? 'holerites'
-            : 'DEMOSTRATIVO_ANUAL' && 'declaracao-anual'
-        }?numberPages=${numberPages}`,
-        {
-          method: 'POST',
-          body: formData,
-          // enable progress reporting
-          onUploadProgress: (progressEvent: {
-            loaded: number
-            total: number
-          }) => {
-            const progress = Math.round(
-              (progressEvent.loaded / progressEvent.total) * 100
-            )
-            setUploadProgress(progress)
-          }
-        } as any
-      )
+      for (const file of files) {
+        const formData = new FormData()
+        formData.append('pdf', file)
 
-      if (!res.ok) {
-        throw new Error(`Error uploading file: ${res.status}`)
-      }
-
-      const text = await res.text()
-      const parsedResults = JSON.parse(text)
-      if (!Array.isArray(parsedResults)) {
-        throw new Error(
-          'Invalid response format. The response is not an array:'
+        const res = await fetch(
+          `https://sepremjaboticabalback-end-production.up.railway.app/${
+            fileType === 'HOLERITE'
+              ? 'holerites'
+              : 'DEMOSTRATIVO_ANUAL' && 'declaracao-anual'
+          }?numberPages=${numberPages}`,
+          {
+            method: 'POST',
+            body: formData,
+            // enable progress reporting
+            onUploadProgress: (progressEvent: {
+              loaded: number
+              total: number
+            }) => {
+              const progress = Math.round(
+                (progressEvent.loaded / progressEvent.total) * 100
+              )
+              setUploadProgress(progress)
+            }
+          } as any
         )
-      }
 
-      setProcessedCount(0) // reset the processed count
-      setProcessedCountTotal(parsedResults.length) // set the total count
-      setUploadLog([]) // reset the upload log
-      for (const result of parsedResults) {
-        try {
-          await processPDFResult(result)
-          setProcessedCount((count) => count + 1) // increment the processed count
-        } catch (error) {
-          console.error(`Error processing result ${result}: ${error}`)
-          // handle the error (e.g. show an error message to the user)
+        if (!res.ok) {
+          throw new Error(`Error uploading file: ${res.status}`)
+        }
+
+        const text = await res.text()
+        const parsedResults = JSON.parse(text)
+        if (!Array.isArray(parsedResults)) {
+          throw new Error(
+            'Invalid response format. The response is not an array:'
+          )
+        }
+
+        setProcessedCount(0)
+        setProcessedCountTotal(parsedResults.length)
+        setUploadLog([])
+
+        for (const result of parsedResults) {
+          try {
+            await processPDFResult(result)
+            setProcessedCount((count) => count + 1)
+          } catch (error) {
+            console.error(`Error processing result ${result}: ${error}`)
+          }
         }
       }
     } catch (error) {
@@ -310,24 +312,48 @@ const UploadPdf: NextPage = () => {
           <div className="flex flex-row items-center justify-between space-x-4 w-fit">
             <label
               htmlFor="pdf"
-              className={`px-4 py-2 text-lg font-medium text-white rounded-md cursor-pointer  ${
+              className={`px-4 py-2 text-lg font-medium text-white rounded-md cursor-pointer flex flex-col ${
                 isUploading
                   ? 'bg-gray-400 hover:bg-gray-300'
                   : 'bg-blue-600 hover:bg-blue-700'
               }`}
             >
-              {file ? file.name : 'selecionar um arquivo PDF'}
+              <div className="flex flex-col w-full file-list">
+                {files.length !== 0 ? (
+                  files.map((item, index) => (
+                    <div key={index} className="flex flex-col w-full mb-2 file-item">
+                      <div className="flex items-center space-x-2">
+                        {/* File Icon */}
+                        <FaFilePdf className="text-red-500" />
+                        {/* File Name */}
+                        <span className="file-name">{item.name}</span>
+                      </div>
+                      {/* Separator */}
+                      {index < files.length - 1 && (
+                        <span className="w-full h-px mt-2 bg-gray-300 line"></span>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex items-center justify-center m-4 text-white">
+                    Selecione um ou múltiplos arquivos PDF
+                    <FaFilePdf className="ml-2 text-red-500" />
+                  </div>
+                )}
+              </div>
               <input
                 id="pdf"
                 name="pdf"
                 type="file"
-                accept="application/pdf"
+                accept=".pdf"
+                multiple
                 onChange={handleFileChange}
-                className="sr-only "
+                className="sr-only"
                 disabled={isUploading}
               />
             </label>
-            {file !== null ? (
+          </div>
+            {files.length !== 0 ? (
               <button
                 type="submit"
                 className="px-4 py-2 text-lg font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
@@ -340,7 +366,6 @@ const UploadPdf: NextPage = () => {
                 )}
               </button>
             ) : null}
-          </div>
           <div className="flex justify-center mb-4 text-sm text-gray-500">
             <div className="flex items-center mr-4">
               <FaCheckCircle className="mr-2 text-blue-500" />
