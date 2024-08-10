@@ -38,6 +38,7 @@ const UploadPdf: NextPage = () => {
   const [uploadLog, setUploadLog] = useState<UploadLogItem[]>([])
   const [overwriteState, setOverwriteState] = useState(false)
   const [numberPages, setNumberPages] = useState(1)
+  const [currentFileProcessed, setCurrentFileProcessed] = useState<number>(0)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFiles(Array.from(e.target.files || []))
@@ -153,23 +154,25 @@ const UploadPdf: NextPage = () => {
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
     if (files.length === 0) {
-      console.error('No files selected')
-      return
+      console.error('No files selected');
+      return;
     }
-
-    setIsUploading(true)
-    setUploadLog([])
-    setUploadProgress(null)
-    setProcessedCountTotal(0)
-    setProcessedCount(0)
-
+  
+    setIsUploading(true);
+    setUploadLog([]);
+    setUploadProgress(null);
+    setProcessedCountTotal(0);
+    setProcessedCount(0);
+  
     try {
-      for (const file of files) {
-        const formData = new FormData()
-        formData.append('pdf', file)
-
+      const uploadPromises = files.map(async (file, index) => {
+  
+        const formData = new FormData();
+        formData.append('pdf', file);
+        setCurrentFileProcessed((count) => count + index);
+  
         const res = await fetch(
           `https://sepremjaboticabalback-end-production.up.railway.app/${
             fileType === 'HOLERITE'
@@ -181,48 +184,49 @@ const UploadPdf: NextPage = () => {
             body: formData,
             // enable progress reporting
             onUploadProgress: (progressEvent: {
-              loaded: number
-              total: number
+              loaded: number;
+              total: number;
             }) => {
               const progress = Math.round(
                 (progressEvent.loaded / progressEvent.total) * 100
-              )
-              setUploadProgress(progress)
+              );
+              setUploadProgress(progress);
             }
           } as any
-        )
-
+        );
+  
         if (!res.ok) {
-          throw new Error(`Error uploading file: ${res.status}`)
+          throw new Error(`Error uploading file: ${res.status}`);
         }
-
-        const text = await res.text()
-        const parsedResults = JSON.parse(text)
+  
+        const text = await res.text();
+        const parsedResults = JSON.parse(text);
         if (!Array.isArray(parsedResults)) {
-          throw new Error(
-            'Invalid response format. The response is not an array:'
-          )
+          throw new Error('Invalid response format. The response is not an array:');
         }
-
-        setProcessedCount(0)
-        setProcessedCountTotal(parsedResults.length)
-        setUploadLog([])
-
+  
+        setProcessedCountTotal((prev) => prev + parsedResults.length);
+        setUploadLog([]);
+  
         for (const result of parsedResults) {
           try {
-            await processPDFResult(result)
-            setProcessedCount((count) => count + 1)
+            await processPDFResult(result);
+            setProcessedCount((count) => count + 1);
           } catch (error) {
-            console.error(`Error processing result ${result}: ${error}`)
+            console.error(`Error processing result ${result}: ${error}`);
           }
         }
-      }
+      });
+  
+      await Promise.all(uploadPromises);
+  
     } catch (error) {
-      console.log(error)
+      console.log(error);
     } finally {
-      setIsUploading(false)
+      setIsUploading(false);
     }
-  }
+  };
+  
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -314,25 +318,30 @@ const UploadPdf: NextPage = () => {
               htmlFor="pdf"
               className={`px-4 py-2 text-lg font-medium text-white rounded-md cursor-pointer flex flex-col ${
                 isUploading
-                  ? 'bg-gray-400 hover:bg-gray-300'
+                  ? 'bg-blue-800'
                   : 'bg-blue-600 hover:bg-blue-700'
               }`}
             >
               <div className="flex flex-col w-full file-list">
                 {files.length !== 0 ? (
-                  files.map((item, index) => (
-                    <div key={index} className="flex flex-col w-full mb-2 file-item">
-                      <div className="flex items-center space-x-2">
-                        {/* File Icon */}
-                        <FaFilePdf className="text-red-500" />
-                        {/* File Name */}
-                        <span className="file-name">{item.name}</span>
+                  files.map((item, index, array) => (
+                    <>
+                       {index >= 0 && (
+                      <span>Arquivos processado: {currentFileProcessed} de {index}</span>
+                       )}
+                      <div key={index} className="flex flex-col w-full mb-2 file-item">
+                        <div className="flex items-center space-x-2">
+                          {/* File Icon */}
+                          <FaFilePdf className="text-red-500" />
+                          {/* File Name */}
+                          <span className={`${currentFileProcessed - 1 === index ? 'text-green-400' : ''}`}>{item.name}</span>
+                        </div>
+                        {/* Separator */}
+                        {index < files.length - 1 && (
+                          <span className="w-full h-px mt-2 bg-white line"></span>
+                        )}
                       </div>
-                      {/* Separator */}
-                      {index < files.length - 1 && (
-                        <span className="w-full h-px mt-2 bg-gray-300 line"></span>
-                      )}
-                    </div>
+                    </>
                   ))
                 ) : (
                   <div className="flex items-center justify-center m-4 text-white">
@@ -431,44 +440,44 @@ const UploadPdf: NextPage = () => {
               )}%`}</span>
             </div>
           )}
-          {uploadLog.length > 0 && (
-            <div className="flex flex-col w-full mt-4">
-              {[...uploadLog].reverse().map((item, index) => (
-                <div
-                  key={index}
-                  className={`flex items-center py-2 ${
-                    item.status === 'UPLOADING'
-                      ? 'bg-blue-300 text-blue-700'
-                      : item.status === 'SUCCESS'
-                      ? 'bg-green-300 text-green-700'
-                      : item.status === 'DUPLICATE'
-                      ? 'bg-yellow-300 text-yellow-700'
-                      : item.status === 'OVERWRITE'
-                      ? 'bg-violet-300 text-violet-700'
-                      : 'bg-red-300 text-red-700'
-                  }`}
-                  style={{
-                    backgroundColor:
-                      item.status === 'UPLOADING'
-                        ? 'bg-blue-300 text-blue-700'
-                        : item.status === 'SUCCESS'
-                        ? '#C8E6C9'
-                        : item.status === 'DUPLICATE'
-                        ? '#FFF9C4'
-                        : item.status === 'OVERWRITE'
-                        ? '#cfbde4'
-                        : '#FFCDD2',
-                    borderRadius: '4px'
-                  }}
-                >
-                  <div className="flex items-center w-full mx-2">
-                    <span className="flex-grow">{item.name}</span>
-                    <span className="ml-4">{getStatusIcon(item.status)}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+
+  {uploadLog.length > 0 && (
+    <div className="grid w-full grid-cols-1 gap-4 mt-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {[...uploadLog].reverse().map((item, index) => (
+        <div
+          key={index}
+          className={`flex items-center p-4 rounded-lg animate-in fade-in zoom-in 
+            ${item.status === 'UPLOADING'
+              ? 'bg-blue-300 text-blue-700'
+              : item.status === 'SUCCESS'
+              ? 'bg-green-300 text-green-700'
+              : item.status === 'DUPLICATE'
+              ? 'bg-yellow-300 text-yellow-700'
+              : item.status === 'OVERWRITE'
+              ? 'bg-violet-300 text-violet-700'
+              : 'bg-red-300 text-red-700'
+          }`}
+          style={{
+            backgroundColor:
+              item.status === 'UPLOADING'
+                ? '#B3E5FC'
+                : item.status === 'SUCCESS'
+                ? '#C8E6C9'
+                : item.status === 'DUPLICATE'
+                ? '#FFF9C4'
+                : item.status === 'OVERWRITE'
+                ? '#CFBDE4'
+                : '#FFCDD2'
+          }}
+        >
+          <div className="flex items-center w-full">
+            <span className="flex-grow">{item.name}</span>
+            <span className="flex-end">{getStatusIcon(item.status)}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
         </div>
       </form>
     </main>
