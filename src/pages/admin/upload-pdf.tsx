@@ -1,8 +1,10 @@
 import { IBeneficiary } from '@/common/validation/beneficiary'
 import { IBeneficiaryPdfFile, IFileType } from '@/common/validation/pdf'
 import { trpc } from '@common/trpc'
+import * as ProgressPrimitive from "@radix-ui/react-progress"
 import { NextPage } from 'next'
 import { useState } from 'react'
+
 import {
   FaCheckCircle,
   FaExclamationTriangle, FaFilePdf, FaPen,
@@ -402,11 +404,10 @@ const UploadPdf: NextPage = () => {
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>
-              <span>{uploadProgress}%</span>
             </div>
           )}
           {processedCountTotal > 0 && (
-            <div className="flex items-center">
+            <div className="flex flex-row items-center">
               <span className="mr-2">{`${processedCount}/${processedCountTotal}`}</span>
               <div className="relative flex-grow h-2 mr-2 bg-gray-200 rounded-full">
                 <div
@@ -416,6 +417,22 @@ const UploadPdf: NextPage = () => {
                   }}
                 />
               </div>
+              <div className='w-80'>
+                <ProgressPrimitive.Root
+                  value={Math.round(
+                    (processedCount / processedCountTotal) * 100
+                  )}
+                  className="w-full h-3 overflow-hidden bg-white rounded-full dark:bg-gray-900"
+                >
+                  <ProgressPrimitive.Indicator
+                    style={{ width: `${Math.round(
+                      (processedCount / processedCountTotal) * 100
+                    )}%` }}
+                    className="h-full duration-300 ease-in-out bg-purple-500 dark:bg-white"
+                  />
+                </ProgressPrimitive.Root>
+              </div>
+              &nbsp;
               <span>{`${Math.round(
                 (processedCount / processedCountTotal) * 100
               )}%`}</span>
