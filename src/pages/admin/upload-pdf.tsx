@@ -421,44 +421,43 @@ const UploadPdf: NextPage = () => {
               )}%`}</span>
             </div>
           )}
-
-  {uploadLog.length > 0 && (
-    <div className="grid w-full grid-cols-1 gap-4 mt-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {[...uploadLog].reverse().map((item, index) => (
-        <div
-        key={item.name + index}
-          className={`flex items-center p-4 rounded-lg animate-in fade-in zoom-in 
-            ${item.status === 'UPLOADING'
-              ? 'bg-blue-300 text-blue-700'
-              : item.status === 'SUCCESS'
-              ? 'bg-green-300 text-green-700'
-              : item.status === 'DUPLICATE'
-              ? 'bg-yellow-300 text-yellow-700'
-              : item.status === 'OVERWRITE'
-              ? 'bg-violet-300 text-violet-700'
-              : 'bg-red-300 text-red-700'
-          }`}
-          style={{
-            backgroundColor:
-              item.status === 'UPLOADING'
-                ? '#B3E5FC'
-                : item.status === 'SUCCESS'
-                ? '#C8E6C9'
-                : item.status === 'DUPLICATE'
-                ? '#FFF9C4'
-                : item.status === 'OVERWRITE'
-                ? '#CFBDE4'
-                : '#FFCDD2'
-          }}
-        >
-          <div className="flex items-center w-full">
-            <span className="flex-grow">{item.name}</span>
-            <span className="flex-end">{getStatusIcon(item.status)}</span>
-          </div>
-        </div>
-      ))}
-    </div>
-  )}
+          {uploadLog.length > 0 && (
+            <div className="grid w-full grid-cols-1 gap-4 mt-4 overflow-auto md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {[...uploadLog].reverse().map((item, index) => (
+                <div
+                key={item.name + index}
+                  className={`flex items-center p-4 rounded-lg  
+                    ${item.status === 'UPLOADING'
+                      ? 'bg-blue-300 text-blue-700'
+                      : item.status === 'SUCCESS'
+                      ? 'bg-green-300 text-green-700'
+                      : item.status === 'DUPLICATE'
+                      ? 'bg-yellow-300 text-yellow-700'
+                      : item.status === 'OVERWRITE'
+                      ? 'bg-violet-300 text-violet-700'
+                      : 'bg-red-300 text-red-700'
+                  }`}
+                  style={{
+                    backgroundColor:
+                      item.status === 'UPLOADING'
+                        ? '#B3E5FC'
+                        : item.status === 'SUCCESS'
+                        ? '#C8E6C9'
+                        : item.status === 'DUPLICATE'
+                        ? '#FFF9C4'
+                        : item.status === 'OVERWRITE'
+                        ? '#CFBDE4'
+                        : '#FFCDD2'
+                  }}
+                >
+                  <div className="flex items-center w-full">
+                    <span className="flex-grow">{item.name}</span>
+                    <span className="flex-end">{getStatusIcon(item.status)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </form>
     </main>
