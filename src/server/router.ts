@@ -145,12 +145,12 @@ export const serverRouter = t.router({
         //     message: 'You are not authorized to perform this action',
         //   })
         // }
-        console.log(input, ctx?.session?.user ?? 'nao tem user')
+        // console.log(input, ctx?.session?.user ?? 'nao tem user')
 
         const pdfFiles = await ctx.prisma.beneficiaryPdfFile.findMany({
           where: { cpf }
         })
-        console.log(pdfFiles)
+        // console.log(pdfFiles)
 
         return {
           status: 200,
