@@ -24,7 +24,7 @@ model BeneficiaryPdfFile {
   cpf         String
   fileName    String
   fileType    PdfFileType
-  file        String
+  file        Bytes @db.ByteA
   year        Int
   month       String?
   createdAt   DateTime         @default(now())

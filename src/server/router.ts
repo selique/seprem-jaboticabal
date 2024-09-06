@@ -76,7 +76,8 @@ export const serverRouter = t.router({
             fileType: _fileType,
             year,
             month: _fileType === 'HOLERITE' ? month : null,
-            file
+            // from string base64 to Buffer
+            file: Buffer.from(file, 'base64'),
           }
         })
 
@@ -150,12 +151,14 @@ export const serverRouter = t.router({
         const pdfFiles = await ctx.prisma.beneficiaryPdfFile.findMany({
           where: { cpf }
         })
-        // console.log(pdfFiles)
-
+  
         return {
           status: 200,
           message: 'User found successfully',
-          result: pdfFiles
+          result: pdfFiles.map(pdfFile => ({
+            ...pdfFile,
+            file: pdfFile.file ? pdfFile.file.toString('base64') : null,
+          }))
         }
       } catch (error) {
         // Handle the error gracefully and provide an appropriate response
