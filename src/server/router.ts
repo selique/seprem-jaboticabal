@@ -80,13 +80,24 @@ export const serverRouter = t.router({
             file: Buffer.from(file, 'base64'),
           }
         })
-
+      
         if (createFilePDF) {
-          // console.log(
-          //   `PDF file ${overwrite ? 'updated' : 'created'} successfully`
-          // )
           // Execute the raw query to update CPF format
-    
+          const updateCpfQuery = `
+            UPDATE public."BeneficiaryPdfFile"
+            SET cpf = regexp_replace(cpf, '([0-9]{3})([0-9]{3})([0-9]{3})([0-9]{2})', '\\1.\\2.\\3-\\4')
+            WHERE "fileName" !~ '^[0-9]{3}\\.[0-9]{3}\\.[0-9]{3}-[0-9]{2}$'
+          `;
+      
+          // Log da query para o sistema de rastreamento
+          console.log(`[QUERY LOG] Executing query to update CPF: ${updateCpfQuery}`);
+      
+          // Executa a query para atualizar o formato do CPF
+          const sqlraw = await ctx.prisma.$executeRawUnsafe(updateCpfQuery);
+      
+          // Loga o número de linhas afetadas pela query
+          console.log(`[QUERY RESULT] Rows affected: ${sqlraw}`);
+          
           const typeResult = overwrite ? 200 : 201
           return {
             status: typeResult,
